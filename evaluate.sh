@@ -1,13 +1,5 @@
 # !/bin/bash
 SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
-# cd $(dirname $SHELL_FOLDER)
-# cd ../
-
-source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
-conda activate py3.12+pytorch2.7.1+cu126
-
-# export http_proxy=http://10.8.36.1:2080
-# export https_proxy=http://10.8.36.1:2080
 
 python evaluation.py \
 --benchmark_dir EditScore/EditReward-Bench \

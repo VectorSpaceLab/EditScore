@@ -1,19 +1,10 @@
-torch==2.6.0
-torchvision==0.21.0
-timm
-einops
+torch==2.7.1
+torchvision==0.22.1
 accelerate
-transformers==4.51.3
-diffusers
-opencv-python-headless
-scipy
-wandb
-matplotlib
+transformers
+datasets
 Pillow
 tqdm
-omegaconf
 python-dotenv
-ninja
-ipykernel
 wheel
-triton-windows; sys_platform == "win32"
+vllm
