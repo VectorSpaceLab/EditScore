@@ -30,7 +30,7 @@
 ## 🔥 News
 - **2025-09-29**: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench).
 
-## Introduction
+## 📖 Introduction
 While Reinforcement Learning (RL) holds immense potential for this domain, its progress has been severely hindered by the absence of a high-fidelity, efficient reward signal.
 
 To overcome this barrier, we provide a systematic, two-part solution:
@@ -58,17 +58,11 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
   <em>EditScore as a superior reward signal for image editing.</em>
 </p>
 
-<!-- <p align="center">
-  <img src="assets/examples_subject.png" width="95%">
-  <br>
-  <em> Good demonstrations of OmniGen2's in-context generation capabilities.</em>
-</p> -->
-
-
 
 ## 📌 TODO
-- [ ] RL training code that applying EditScore to OmniGen2.
-- [ ] Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext and Qwen-Image-Edit.
+We are actively working on improving EditScore and expanding its capabilities. Here's what's next:
+- [ ] Release RL training code applying EditScore to OmniGen2.
+- [ ] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
 
 ## 🚀 Quick Start
 
@@ -105,19 +99,21 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ---
 
-### 🧪 EditScore Usage Example
-
+### 🧪 Usage Example
+Using EditScore is straightforward. The model will be automatically downloaded from the Hugging Face Hub on its first run.
 ```python
 from PIL import Image
 from editscore import EditScore
 
-model_path = "/share/project/jiahao/LLaMA-Factory2/output/merge_v7-2_8models_omnigen2-4samples_gpt4-1_range_0to25"
+# Load the EditScore model. It will be downloaded automatically.
+# Replace with the specific model version you want to use.
+model_path = "EditScore/EditScore-7B"
 
 scorer = EditScore(
     backbone="qwen25vl",
     model_name_or_path=model_path,
     score_range=25,
-    num_pass=1, # the number of forward passes, better performance with larger of this value
+    num_pass=1, # Increase for better performance via self-ensembling
 )
 
 input_image = Image.open("example_images/input.png")
@@ -125,14 +121,16 @@ output_image = Image.open("example_images/output.png")
 instruction = "Adjust the background to a glass wall."
 
 result = scorer.evaluate([input_image, output_image], instruction)
-print(result)
+print(f"Edit Score: {result['final_score']}")
+# Expected output: A dictionary containing the final score and other details.
 ```
 
 ---
 
 ## Benchmark Your Image-Editing Reward Model
-We provide an example script on how to evaluate Edit-Score on **EditReward-Bench**, to evaluate your own model, you can define another scorer with similar interface.
+We provide an evaluation script to benchmark models on **EditReward-Bench**. To evaluate your own custom reward model, simply create a scorer class with a similar interface and update the script.
 ```bash
+# This script will evaluate the default EditScore model on the benchmark
 bash evaluate.sh
 ```
 
