@@ -99,7 +99,7 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ---
 
-### 🧪 Example Usage
+### 🧪 EditScore Usage Example
 
 ```python
 from PIL import Image
@@ -124,7 +124,7 @@ print(result)
 
 ---
 
-## Benchmark Your Image-Editing Reward Model
+## Benchmark Your Image-Editing Reward Model with Edit Reward-Bench
 We provide an example script that evaluate Edit-Score on EditReward-Bench
 ```bash
 bash evaluate.sh
