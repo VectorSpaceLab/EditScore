@@ -128,7 +128,7 @@ print(f"Edit Score: {result['final_score']}")
 ---
 
 ## 📊 Benchmark Your Image-Editing Reward Model
-We provide an evaluation script to benchmark models on **EditReward-Bench**. To evaluate your own custom reward model, simply create a scorer class with a similar interface and update the script.
+We provide an evaluation script to benchmark reward models on **EditReward-Bench**. To evaluate your own custom reward model, simply create a scorer class with a similar interface and update the script.
 ```bash
 # This script will evaluate the default EditScore model on the benchmark
 bash evaluate.sh
