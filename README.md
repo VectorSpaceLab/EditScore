@@ -62,6 +62,7 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 
 ## 📌 TODO
 - [ ] RL training code that applying EditScore to OmniGen2.
+- [ ] Best-of-$N$ inference scripts for OmniGen2, Flux-dev-Kontext and Qwen-Image-Edit.
 
 ## 🚀 Quick Start
 
@@ -71,57 +72,54 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 
 ```bash
 # 1. Clone the repo
-git clone git@github.com:VectorSpaceLab/OmniGen2.git
-cd OmniGen2
+git clone git@github.com:VectorSpaceLab/EditScore.git
+cd EditScore
 
 # 2. (Optional) Create a clean Python environment
-conda create -n omnigen2 python=3.11
-conda activate omnigen2
+conda create -n editscore python=3.12
+conda activate editscore
 
 # 3. Install dependencies
 # 3.1 Install PyTorch (choose correct CUDA version)
-pip install torch==2.6.0 torchvision --extra-index-url https://download.pytorch.org/whl/cu124
+pip install torch==2.7.1 torchvision --extra-index-url https://download.pytorch.org/whl/cu126
 
 # 3.2 Install other required packages
 pip install -r requirements.txt
-
-# Note: Version 2.7.4.post1 is specified for compatibility with CUDA 12.4.
-# Feel free to use a newer version if you use CUDA 12.6 or they fixed this compatibility issue.
-# OmniGen2 runs even without flash-attn, though we recommend install it for best performance.
-pip install flash-attn==2.7.4.post1 --no-build-isolation
 ```
 
 #### 🌏 For users in Mainland China
 
 ```bash
 # Install PyTorch from a domestic mirror
-pip install torch==2.6.0 torchvision --index-url https://mirror.sjtu.edu.cn/pytorch-wheels/cu124
+pip install torch==2.7.1 torchvision --index-url https://mirror.sjtu.edu.cn/pytorch-wheels/cu126
 
 # Install other dependencies from Tsinghua mirror
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# Note: Version 2.7.4.post1 is specified for compatibility with CUDA 12.4.
-# Feel free to use a newer version if you use CUDA 12.6 or they fixed this compatibility issue.
-# OmniGen2 runs even without flash-attn, though we recommend install it for best performance.
-pip install flash-attn==2.7.4.post1 --no-build-isolation -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ---
 
-### 🧪 Run Examples
+### 🧪 Example Usage
 
-```bash
-# Visual Understanding
-bash example_understanding.sh
+```python
+from PIL import Image
+from editscore import EditScore
 
-# Text-to-image generation
-bash example_t2i.sh
+model_path = "/share/project/jiahao/LLaMA-Factory2/output/merge_v7-2_8models_omnigen2-4samples_gpt4-1_range_0to25"
 
-# Instruction-guided image editing
-bash example_edit.sh
+scorer = EditScore(
+    backbone="qwen25vl",
+    model_name_or_path=model_path,
+    score_range=25,
+    num_pass=1, # the number of passes for the model to evaluate the image
+)
 
-# In-context generation
-bash example_in_context_generation.sh
+input_image = Image.open("example_images/input.png")
+output_image = Image.open("example_images/output.png")
+instruction = "Adjust the background to a glass wall."
+
+result = scorer.evaluate([input_image, output_image], instruction)
+print(result)
 ```
 
 ---

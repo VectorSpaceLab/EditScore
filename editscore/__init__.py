@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, 'viescore')
+sys.path.insert(0, 'editscore')
 
 from .utils import (
     mllm_output_to_dict
@@ -8,14 +8,14 @@ import math
 from . import vie_prompts
 import numpy as np
 
-class VIEScore:
+class EditScore:
     def __init__(
         self,
         backbone="gpt-4.1",
         openai_url="https://api.openai.com/v1/chat/completions",
         key=None,
         model_name_or_path="",
-        score_range: int=10,
+        score_range: int=25,
         temperature: float=0.7,
         tensor_parallel_size: int=1,
         max_model_len: int=1536,
