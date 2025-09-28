@@ -41,18 +41,18 @@ We demonstrate the practical utility of EditScore through two key applications:
 This repository releases both the **EditScore** models and the **EditReward-Bench** dataset to facilitate future research in reward modeling, policy optimization, and AI-driven model improvement.
 
 <p align="center">
-  <img src="assets/table2.png" width="95%">
+  <img src="assets/table_reward_model_results.png" width="95%">
   <br>
   <em>Benchmark results on EditReward-Bench</em>
 </p>
-<!-- 
-<p align="center">
-  <img src="assets/examples_edit.png" width="95%">
-  <br>
-  <em> Good demonstrations of OmniGen2's image editing capabilities.</em>
-</p>
 
 <p align="center">
+  <img src="assets/figure_edit_results.png" width="95%">
+  <br>
+  <em>Benchmark results on EditReward-Bench</em>
+</p>
+
+<!-- <p align="center">
   <img src="assets/examples_subject.png" width="95%">
   <br>
   <em> Good demonstrations of OmniGen2's in-context generation capabilities.</em>
@@ -111,7 +111,7 @@ scorer = EditScore(
     backbone="qwen25vl",
     model_name_or_path=model_path,
     score_range=25,
-    num_pass=1, # the number of passes for the model to evaluate the image
+    num_pass=1, # the number of forward passes, better performance with larger of this value
 )
 
 input_image = Image.open("example_images/input.png")
