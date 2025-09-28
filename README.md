@@ -25,7 +25,7 @@
 - **State-of-the-Art Performance**: Effectively matches the performance of leading proprietary VLMs. With a self-ensembling strategy, **our largest model surpasses even GPT-5** on our comprehensive benchmark, **EditReward-Bench**.
 - **A Reliable Evaluation Standard**: We introduce **EditReward-Bench**, the first public benchmark specifically designed for evaluating reward models in image editing, featuring 13 subtasks and expert human annotations.
 - **Simple and Easy-to-Use**: Get an accurate quality score for your image edits with just a few lines of code.
-- **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for stable and effective Reinforcement Learning (RL) fine-tuning.
+- **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
 - **2025-09-29**: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench).
