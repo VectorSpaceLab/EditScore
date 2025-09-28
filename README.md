@@ -20,12 +20,18 @@
     <p>
 </h4>
 
+EditScore is a series of state-of-the-art open-source reward models (7B–72B) designed to evaluate and enhance instruction-guided image editing.
+## ✨ Highlights
+- **State-of-the-Art Performance**: Outperforms leading proprietary VLMs (including GPT-4V) and all open-source reward models on our comprehensive benchmark, **EditReward-Bench**.
+- **A Reliable Evaluation Standard**: We introduce **EditReward-Bench**, the first public benchmark specifically designed for evaluating reward models in image editing, featuring 13 subtasks and expert human annotations.
+- **Simple and Easy-to-Use**: Get an accurate quality score for your image edits with just a few lines of code.
+- **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for stable and effective Reinforcement Learning (RL) fine-tuning.
+
 ## 🔥 News
-- **2025-09-29**: We release **EditScore** and **EditReward-Bench**, model weights and benchmark can be accessed in [model](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [benchmark](https://huggingface.co/datasets/EditScore/EditReward-Bench).
+- **2025-09-29**: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench).
 
 ## Introduction
-
-**EditScore** is a series of state-of-the-art open-source reward models (7B–72B) designed to evaluate and enhance instruction-guided image editing. While Reinforcement Learning (RL) holds immense potential for this domain, its progress has been severely hindered by the absence of a high-fidelity, efficient reward signal.
+While Reinforcement Learning (RL) holds immense potential for this domain, its progress has been severely hindered by the absence of a high-fidelity, efficient reward signal.
 
 To overcome this barrier, we provide a systematic, two-part solution:
 
