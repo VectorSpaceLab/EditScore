@@ -125,10 +125,10 @@ print(result)
 ---
 
 ## Benchmark Your Image-Editing Reward Model
-
-
-## 🎨 Fine-tune
-See [fine-tuning](docs/FINETUNE.md) for details.
+We provide an example script that evaluate Edit-Score on EditReward-Bench
+```bash
+bash evaluate.sh
+```
 
 ## ❤️ Citing Us
 If you find this repository or our work useful, please consider giving a star ⭐ and citation 🦖, which would be greatly appreciated:
