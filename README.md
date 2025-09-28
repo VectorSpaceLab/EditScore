@@ -20,7 +20,7 @@
     <p>
 </h4>
 
-EditScore is a series of state-of-the-art open-source reward models (7B–72B) designed to evaluate and enhance instruction-guided image editing.
+**EditScore** is a series of state-of-the-art open-source reward models (7B–72B) designed to evaluate and enhance instruction-guided image editing.
 ## ✨ Highlights
 - **State-of-the-Art Performance**: Outperforms leading proprietary VLMs (including GPT-4V) and all open-source reward models on our comprehensive benchmark, **EditReward-Bench**.
 - **A Reliable Evaluation Standard**: We introduce **EditReward-Bench**, the first public benchmark specifically designed for evaluating reward models in image editing, featuring 13 subtasks and expert human annotations.
