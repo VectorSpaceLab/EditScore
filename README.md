@@ -43,13 +43,13 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 <p align="center">
   <img src="assets/table_reward_model_results.png" width="95%">
   <br>
-  <em>Benchmark results on EditReward-Bench</em>
+  <em>Benchmark results on EditReward-Bench.</em>
 </p>
 
 <p align="center">
   <img src="assets/figure_edit_results.png" width="95%">
   <br>
-  <em>Benchmark results on EditReward-Bench</em>
+  <em>EditScore as a superior reward signal for image editing.</em>
 </p>
 
 <!-- <p align="center">
