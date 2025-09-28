@@ -125,7 +125,7 @@ print(result)
 ---
 
 ## Benchmark Your Image-Editing Reward Model
-We provide an example script that evaluate Edit-Score on **EditReward-Bench**
+We provide an example script on how to evaluate Edit-Score on **EditReward-Bench**, to evaluate your own model, you can define another scorer with similar interface.
 ```bash
 bash evaluate.sh
 ```
@@ -134,10 +134,10 @@ bash evaluate.sh
 If you find this repository or our work useful, please consider giving a star ⭐ and citation 🦖, which would be greatly appreciated:
 
 ```bibtex
-@article{wu2025omnigen2,
-  title={OmniGen2: Exploration to Advanced Multimodal Generation},
-  author={Chenyuan Wu and Pengfei Zheng and Ruiran Yan and Shitao Xiao and Xin Luo and Yueze Wang and Wanli Li and Xiyan Jiang and Yexin Liu and Junjie Zhou and Ze Liu and Ziyi Xia and Chaofan Li and Haoge Deng and Jiahao Wang and Kun Luo and Bo Zhang and Defu Lian and Xinlong Wang and Zhongyuan Wang and Tiejun Huang and Zheng Liu},
-  journal={arXiv preprint arXiv:2506.18871},
+@article{luo2025editscore,
+  title={EditScore: Unlocking Online RL for Image Editing via High-Fidelity Reward Modeling},
+  author={Xin Luo and Jiahao Wang and Chenyuan Wu and Shitao Xiao and Xiyan Jiang and Defu Lian and Jiajun Zhang and Dong Liu and Zheng Liu},
+  journal={arXiv preprint arXiv:},
   year={2025}
 }
 ```
