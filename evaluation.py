@@ -80,19 +80,6 @@ def load_pairs_dataset(dataset: Dataset) -> Dict[str, Tuple[str, Image.Image, Im
 
 
 def load_pairs_dataset_multithreaded(dataset: Dataset, max_workers: int = None) -> Dict[str, Tuple[str, Image.Image, Image.Image]]:
-    """
-    使用多线程从Hugging Face数据集中加载和处理图像对。
-
-    Args:
-        dataset (Dataset): 输入的Hugging Face数据集。
-        max_workers (int, optional): 使用的最大线程数。
-                                     如果为None，则会根据CPU核心数选择一个合理的值。默认为 None。
-
-    Returns:
-        Dict[str, Tuple[str, Image.Image, Image.Image]]: 处理完成的字典。
-    """
-    # 如果未指定工作线程数，则设置一个默认值。
-    # 对于I/O密集型任务，线程数可以多于CPU核心数。
     if max_workers is None:
         max_workers = min(32, (os.cpu_count() or 1) * 5)
 
@@ -100,39 +87,28 @@ def load_pairs_dataset_multithreaded(dataset: Dataset, max_workers: int = None) 
     
 
     def _process_item(data: dict) -> list[tuple[str, tuple[str, Image.Image, Image.Image]]]:
-        """
-        工作函数：处理数据集中的单个元素。
-        这个函数会被每个线程独立调用。
-        """
         key1, key2 = data["key"]
         instruction = data["instruction"]
         
-        # 图像的加载和转换是主要耗时部分
         input_image = data["input_image"].convert("RGB")
         output_image1 = data["output_images"][0].convert("RGB")
         output_image2 = data["output_images"][1].convert("RGB")
 
-        # 返回一个列表，包含这一条数据产生的两个键值对
         return [
             (key1, (instruction, input_image, output_image1)),
             (key2, (instruction, input_image, output_image2)),
         ]
     
     print(f"Processing dataset (length: {len(dataset)}) with {max_workers} threads", flush=True)
-    # 使用ThreadPoolExecutor来管理线程池
+    
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        # 提交所有任务到线程池，map会保持原始数据集的顺序
-        # tqdm用于显示进度条，让等待过程不那么枯燥
         results_iterator = tqdm(
             executor.map(_process_item, dataset), 
             total=len(dataset), 
             desc="Processing dataset with multiple threads"
         )
         
-        # 收集每个线程处理完的结果
         for result_pairs in results_iterator:
-            # result_pairs 是 _process_item 返回的列表
-            # 使用 update 方法可以高效地将多个键值对添加到字典中
             pairs.update(result_pairs)
             
     return pairs
