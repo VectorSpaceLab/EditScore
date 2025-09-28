@@ -142,8 +142,8 @@ def main(args):
     cache_manager = CacheManager(cache_file)
 
     start_time = time.time()
-    # dataset = load_dataset(args.benchmark_dir)
-    dataset = load_from_disk(args.benchmark_dir)
+    dataset = load_dataset(args.benchmark_dir)
+    # dataset = load_from_disk(args.benchmark_dir)
     print(f"Dataset loaded in {time.time() - start_time} seconds", flush=True)
 
     start_time = time.time()
@@ -186,6 +186,7 @@ def main(args):
 
     print("Writing results...", flush=True)
 
+    dataset = dataset.remove_columns(["input_image", "output_images"])
     for idx, data in enumerate(dataset):
         key1, key2 = data["key"]
         task_type = data["task_type"]

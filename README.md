@@ -20,20 +20,26 @@
 </h4>
 
 ## 🔥 News
-- **2025-09-28**: We release **EditScore** and **EditReward-Bench**,  model weights can be accessed in [huggingface](https://huggingface.co/OmniGen2/OmniGen2) and [modelscope](https://www.modelscope.cn/models/OmniGen2/OmniGen2).
-
+- **2025-09-29**: We release **EditScore** and **EditReward-Bench**, model weights and benchmark can be accessed in [model](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [benchmark](https://huggingface.co/datasets/EditScore/EditReward-Bench).
 
 ## Introduction
-**OmniGen2** is a powerful and efficient generative model. Unlike OmniGen v1, OmniGen2 features two distinct decoding pathways for text and image modalities, utilizing unshared parameters and a decoupled image tokenizer. OmniGen2 has competitive performance across four primary capabilities:
 
-- **Visual Understanding**: Inherits the robust ability to interpret and analyze image content from its Qwen-VL-2.5 foundation.
-- **Text-to-Image Generation**: Creates high-fidelity and aesthetically pleasing images from textual prompts.
-- **Instruction-guided Image Editing**: Executes complex, instruction-based image modifications with high precision, achieving state-of-the-art performance among open-source models.
-- **In-context Generation**: A versatile capability to process and flexibly combine diverse inputs—including humans, reference objects, and scenes—to produce novel and coherent visual outputs.
+**EditScore** is a series of state-of-the-art open-source reward models (7B–72B) designed to evaluate and enhance instruction-guided image editing. While Reinforcement Learning (RL) holds immense potential for this domain, its progress has been severely hindered by the absence of a high-fidelity, efficient reward signal.
 
-**We will release the training code and dataset. Stay tuned!**
+To overcome this barrier, we provide a systematic, two-part solution:
 
-Some good cases of OmniGen2:
+- **A Rigorous Evaluation Standard**: We first introduce **EditReward-Bench**, a new public benchmark for the direct and reliable evaluation of reward models. It features 13 diverse subtasks and expert human annotations, establishing a gold standard for measuring reward signal quality.
+
+- **A Powerful & Versatile Tool**: Guided by our benchmark, we developed the **EditScore** model series. Through meticulous data curation and an effective self-ensembling strategy, EditScore sets a new state of the art for open-source reward models, even surpassing the accuracy of leading proprietary VLMs.
+
+We demonstrate the practical utility of EditScore through two key applications:
+
+- **As a State-of-the-Art Reranker**: Use EditScore to perform Best-of-$N$ selection and instantly improve the output quality of diverse editing models.
+- **As a High-Fidelity Reward for RL**: Use EditScore as a robust reward signal to fine-tune models via RL, enabling stable training and unlocking significant performance gains where general-purpose VLMs fail.
+
+This repository releases both the **EditScore** models and the **EditReward-Bench** dataset to facilitate future research in reward modeling, policy optimization, and AI-driven model improvement.
+
+<!-- Some good cases of OmniGen2:
 <p align="center">
   <img src="assets/teaser.jpg" width="95%">
   <br>
@@ -50,18 +56,12 @@ Some good cases of OmniGen2:
   <img src="assets/examples_subject.png" width="95%">
   <br>
   <em> Good demonstrations of OmniGen2's in-context generation capabilities.</em>
-</p>
+</p> -->
 
 
 
 ## 📌 TODO
-- [x] Technical report.
-- [x] Support CPU offload and improve inference efficiency.
-- [x] In-context generation benchmark: **OmniContext**.
-- [ ] Integration of diffusers.
-- [x] Training datasets.
-- [ ] Training data construction pipeline.
-- [ ] ComfyUI Demo (**commuity support will be greatly appreciated!**).
+- [ ] RL training code that applying EditScore to OmniGen2.
 
 ## 🚀 Quick Start
 
