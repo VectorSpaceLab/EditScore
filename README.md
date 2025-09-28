@@ -47,7 +47,7 @@ To overcome this barrier, we provide a systematic, two-part solution:
 
 We demonstrate the practical utility of EditScore through two key applications:
 
-- **As a State-of-the-Art Reranker**: Use EditScore to perform Best-of-$N$ selection and instantly improve the output quality of diverse editing models.
+- **As a State-of-the-Art Reranker**: Use EditScore to perform Best-of-*N* selection and instantly improve the output quality of diverse editing models.
 - **As a High-Fidelity Reward for RL**: Use EditScore as a robust reward signal to fine-tune models via RL, enabling stable training and unlocking significant performance gains where general-purpose VLMs fail.
 
 This repository releases both the **EditScore** models and the **EditReward-Bench** dataset to facilitate future research in reward modeling, policy optimization, and AI-driven model improvement.
