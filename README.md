@@ -123,6 +123,10 @@ print(result)
 ```
 
 ---
+
+## Benchmark Your Image-Editing Reward Model
+
+
 ## 🎨 Fine-tune
 See [fine-tuning](docs/FINETUNE.md) for details.
 
