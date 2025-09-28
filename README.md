@@ -124,7 +124,7 @@ print(result)
 
 ---
 
-## Benchmark Your Image-Editing Reward Model with Edit Reward-Bench
+## Benchmark Your Image-Editing Reward Model with EditReward-Bench
 We provide an example script that evaluate Edit-Score on EditReward-Bench
 ```bash
 bash evaluate.sh
