@@ -40,13 +40,12 @@ We demonstrate the practical utility of EditScore through two key applications:
 
 This repository releases both the **EditScore** models and the **EditReward-Bench** dataset to facilitate future research in reward modeling, policy optimization, and AI-driven model improvement.
 
-<!-- Some good cases of OmniGen2:
 <p align="center">
-  <img src="assets/teaser.jpg" width="95%">
+  <img src="assets/table2.png" width="95%">
   <br>
   <em>Demonstrations.</em>
 </p>
-
+<!-- 
 <p align="center">
   <img src="assets/examples_edit.png" width="95%">
   <br>
