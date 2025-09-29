@@ -6,11 +6,11 @@ import time
 import numpy as np
 import torch
 
-from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
-from peft import PeftModel
-
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
+
+from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+from peft import PeftModel
 
 from qwen_vl_utils import process_vision_info
 
