@@ -7,4 +7,3 @@ Pillow
 tqdm
 python-dotenv
 wheel
-vllm
