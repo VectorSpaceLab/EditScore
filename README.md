@@ -13,9 +13,7 @@
     <p>
         <a href=#-news>News</a> |
         <a href=#-quick-start>Quick Start</a> |
-        <a href=#-usage-tips>Usage Tips</a> |
-        <a href=#-limitations-and-suggestions>Limitations</a> |
-        <a href=#-gradio-demo>Online Demos</a> |
+        <a href=#-benchmark-your-image-editing-reward-model usage>Benchmark Your Reward Model</a> |
         <a href=#%EF%B8%8F-citing-us>Citation</a>
     <p>
 </h4>
