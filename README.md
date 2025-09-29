@@ -13,7 +13,7 @@
     <p>
         <a href=#-news>News</a> |
         <a href=#-quick-start>Quick Start</a> |
-        <a href=#-benchmark-your-image-editing-reward-model usage>Benchmark Your Reward Model</a> |
+        <a href=#-benchmark-your-image-editing-reward-model usage>Benchmark Usage</a> |
         <a href=#%EF%B8%8F-citing-us>Citation</a>
     <p>
 </h4>
