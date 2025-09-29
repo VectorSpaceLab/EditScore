@@ -1,7 +1,13 @@
 from typing import Optional
+
+import os
 import random
+import time
 import numpy as np
 import torch
+
+from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+from peft import PeftModel
 
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
@@ -41,7 +47,34 @@ class Qwen25VL():
         max_num_batched_tokens=1536,
         temperature: float = 0.7,
         seed: Optional[int] = None,
+        enable_lora: bool = False,
+        lora_path: str = "",
+        cache_dir: Optional[str] = None,
     ) -> None:
+        self.enable_lora = enable_lora
+        self.lora_path = lora_path
+
+        if self.enable_lora:
+            if cache_dir is None:
+                root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                cache_dir = os.path.join(root_dir, "cache", f"{os.path.basename(vlm_model)}_merged_lora")
+
+            print(f"Merging LORA to {vlm_model} and saving to {cache_dir}", flush=True)
+            start_time = time.time()
+            model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+                vlm_model, torch_dtype=torch.bfloat16, device_map="cpu"
+            )
+            model = PeftModel.from_pretrained(model, lora_path)
+            model = model.merge_and_unload()
+            model.save_pretrained(cache_dir)
+
+            processor = AutoProcessor.from_pretrained(vlm_model)
+            processor.save_pretrained(cache_dir)
+
+            print(f"Merging LORA to {vlm_model} and saving to {cache_dir} took {time.time() - start_time} seconds", flush=True)
+
+            vlm_model = cache_dir
+
         self.model = LLM(
             model=vlm_model,
             max_model_len=max_model_len,

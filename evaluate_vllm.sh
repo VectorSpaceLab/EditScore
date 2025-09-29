@@ -5,7 +5,7 @@ cd $SHELL_FOLDER
 python evaluation.py \
 --benchmark_dir EditScore/EditReward-Bench \
 --result_dir results/EditScore-7B \
---backbone qwen25vl \
+--backbone qwen25vl_vllm \
 --model_name_or_path Qwen/Qwen2.5-VL-7B-Instruct \
 --enable_lora \
 --lora_path EditScore/EditScore-7B \
@@ -18,4 +18,4 @@ python evaluation.py \
 --num_pass 1
 
 python calculate_statistics.py \
---result_dir results/EditScore-7B/qwen25vl
+--result_dir results/EditScore-7B/qwen25vl_vllm

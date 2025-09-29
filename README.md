@@ -107,11 +107,14 @@ from editscore import EditScore
 
 # Load the EditScore model. It will be downloaded automatically.
 # Replace with the specific model version you want to use.
-model_path = "EditScore/EditScore-7B"
+model_path = "Qwen/Qwen2.5-VL-7B-Instruct"
+lora_path = "EditScore/EditScore-7B"
 
 scorer = EditScore(
-    backbone="qwen25vl",
+    backbone="qwen25vl", # set to "qwen25vl_vllm" for faster inference
     model_name_or_path=model_path,
+    enable_lora=True,
+    lora_path=lora_path,
     score_range=25,
     num_pass=1, # Increase for better performance via self-ensembling
 )
@@ -132,6 +135,9 @@ We provide an evaluation script to benchmark reward models on **EditReward-Bench
 ```bash
 # This script will evaluate the default EditScore model on the benchmark
 bash evaluate.sh
+
+# Or speed up inference with VLLM
+bash evaluate_vllm.sh
 ```
 
 ## ❤️ Citing Us

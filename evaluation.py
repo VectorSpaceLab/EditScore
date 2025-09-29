@@ -135,7 +135,7 @@ def parse_args():
         "--backbone",
         type=str,
         default="openai",
-        choices=["openai", "qwen25vl", "internvl3_5"],
+        choices=["openai", "qwen25vl", "qwen25vl_vllm", "internvl3_5"],
     )
     parser.add_argument("--model_name_or_path", type=str, default="gpt-4.1")
     parser.add_argument(
@@ -150,6 +150,9 @@ def parse_args():
     parser.add_argument("--max_model_len", type=int, default=1536)
     parser.add_argument("--max_num_seqs", type=int, default=32)
     parser.add_argument("--max_num_batched_tokens", type=int, default=1536)
+    parser.add_argument("--enable_lora", action="store_true")
+    parser.add_argument("--lora_path", type=str, default="")
+    parser.add_argument("--cache_dir", type=str, default=None)
     return parser.parse_args()
 
 
@@ -167,6 +170,9 @@ def main(args):
         max_num_seqs=args.max_num_seqs,
         max_num_batched_tokens=args.max_num_batched_tokens,
         num_pass=args.num_pass,
+        enable_lora=args.enable_lora,
+        lora_path=args.lora_path,
+        cache_dir=args.cache_dir,
     )
     print(f"Scorer initialized in {time.time() - start_time} seconds", flush=True)
 

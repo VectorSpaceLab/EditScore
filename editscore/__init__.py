@@ -1,6 +1,7 @@
 import sys
 sys.path.insert(0, 'editscore')
 
+from typing import Optional
 from .utils import (
     mllm_output_to_dict
 )
@@ -24,6 +25,9 @@ class EditScore:
         num_pass: int=1,
         reduction: str="average_last",
         seed: int=42,
+        enable_lora: bool=False,
+        lora_path: str="",
+        cache_dir: Optional[str]=None,
     ) -> None:
         self.backbone = backbone
         self.score_range = score_range
@@ -35,6 +39,15 @@ class EditScore:
             from .mllm_tools.openai import GPT4o
             self.model = GPT4o(key, model_name=model_name_or_path, url=openai_url)
         elif self.backbone == "qwen25vl":
+            from .mllm_tools.qwen25vl import Qwen25VL
+            self.model = Qwen25VL(
+                vlm_model=model_name_or_path,
+                temperature=temperature,
+                seed=seed,
+                enable_lora=enable_lora,
+                lora_path=lora_path,
+            )
+        elif self.backbone == "qwen25vl_vllm":
             from .mllm_tools.qwen25vl_vllm import Qwen25VL
             self.model = Qwen25VL(
                 vlm_model=model_name_or_path,
@@ -44,6 +57,9 @@ class EditScore:
                 max_num_batched_tokens=max_num_batched_tokens,
                 temperature=temperature,
                 seed=seed,
+                enable_lora=enable_lora,
+                lora_path=lora_path,
+                cache_dir=cache_dir,
             )
         elif self.backbone == "internvl3_5":
             from .mllm_tools.internvl35_lmdeploy import InternVL35
