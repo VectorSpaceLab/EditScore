@@ -59,19 +59,22 @@ class Qwen25VL():
                 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 cache_dir = os.path.join(root_dir, "cache", f"{os.path.basename(vlm_model)}_merged_lora")
 
-            print(f"Merging LORA to {vlm_model} and saving to {cache_dir}", flush=True)
-            start_time = time.time()
-            model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-                vlm_model, torch_dtype=torch.bfloat16, device_map="cpu"
-            )
-            model = PeftModel.from_pretrained(model, lora_path)
-            model = model.merge_and_unload()
-            model.save_pretrained(cache_dir)
+            if not os.path.exists(cache_dir):
+                print(f"Merging LORA to {vlm_model} and saving to {cache_dir}", flush=True)
+                start_time = time.time()
+                model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+                    vlm_model, torch_dtype=torch.bfloat16, device_map="cpu"
+                )
+                model = PeftModel.from_pretrained(model, lora_path)
+                model = model.merge_and_unload()
+                model.save_pretrained(cache_dir)
 
-            processor = AutoProcessor.from_pretrained(vlm_model)
-            processor.save_pretrained(cache_dir)
+                processor = AutoProcessor.from_pretrained(vlm_model)
+                processor.save_pretrained(cache_dir)
 
-            print(f"Merging LORA to {vlm_model} and saving to {cache_dir} took {time.time() - start_time} seconds", flush=True)
+                print(f"Merging LORA to {vlm_model} and saving to {cache_dir} took {time.time() - start_time} seconds", flush=True)
+            else:
+                print(f"Skipping merging LORA, as merged model already exists in {cache_dir}", flush=True)
 
             vlm_model = cache_dir
 

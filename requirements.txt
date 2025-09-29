@@ -2,7 +2,9 @@ torch==2.7.1
 torchvision==0.22.1
 accelerate
 transformers
+qwen-vl-utils
 datasets
+peft
 Pillow
 tqdm
 python-dotenv
