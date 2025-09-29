@@ -129,6 +129,8 @@ class EditScore:
                     "consistency": np.mean([output_per_pass["consistency"] for output_per_pass in outputs_multi_pass]),
                     "perceptual_quality": np.mean([output_per_pass["perceptual_quality"] for output_per_pass in outputs_multi_pass]),
                     "overall": np.mean([output_per_pass["overall"] for output_per_pass in outputs_multi_pass]),
+                    "SC_reasoning": SC_dict["reasoning"],
+                    "PQ_reasoning": PQ_dict["reasoning"],
                 }
         if self.reduction == "average_first":
             output["overall"] = math.sqrt(output["prompt_following"] * output["perceptual_quality"])

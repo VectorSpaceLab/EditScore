@@ -228,7 +228,7 @@ def main(args):
     print("Writing results...", flush=True)
 
     start_time = time.time()
-    dataset = dataset.remove_columns(["input_image", "output_images"])
+    # dataset = dataset.remove_columns(["input_image", "output_images"])
     for idx, data in enumerate(dataset):
         key1, key2 = data["key"]
         task_type = data["task_type"]
@@ -238,13 +238,22 @@ def main(args):
         score2 = all_scores[key2][dimension]
         data["score"] = [score1, score2]
 
+        input_image_path = os.path.join(args.result_dir, "input_images", f"{key1}_input.png")
+        output_image_path1 = os.path.join(args.result_dir, "output_images", f"{key1}_output0.png")
+        output_image_path2 = os.path.join(args.result_dir, "output_images", f"{key2}_output1.png")
+
+        data['input_image'].save(input_image_path)
+        data['output_images'][0].save(output_image_path1)
+        data['output_images'][1].save(output_image_path2)
+
         json_line = {
             "key": (key1, key2),
             "idx": idx,
-            "score": [
-                score1,
-                score2,
-            ],
+            "score": [score1, score2],
+            "SC_reasoning": [all_scores[key1]["SC_reasoning"], all_scores[key2]["SC_reasoning"]],
+            "PQ_reasoning": [all_scores[key1]["PQ_reasoning"], all_scores[key2]["PQ_reasoning"]],
+            "input_image": input_image_path,
+            "output_images": [output_image_path1, output_image_path2],
         }
 
         save_file = os.path.join(

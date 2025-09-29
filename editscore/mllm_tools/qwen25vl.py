@@ -43,7 +43,7 @@ class Qwen25VL():
         self.lora_path = lora_path
 
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-            vlm_model, dtype=torch.bfloat16, device_map="auto"
+            vlm_model, torch_dtype=torch.bfloat16, device_map="auto"
         )
         if enable_lora:
             self.model = PeftModel.from_pretrained(self.model, lora_path)
