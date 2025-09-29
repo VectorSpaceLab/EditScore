@@ -10,7 +10,7 @@ import logging
 import os
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from typing import List, Tuple, Dict, Any, Optional
 
 import dotenv
@@ -78,32 +78,31 @@ def load_pairs_dataset(dataset: Dataset) -> Dict[str, Tuple[str, Image.Image, Im
         pairs[key2] = (instruction, input_image, data["output_images"][1].convert("RGB"))
     return pairs
 
+def _load_item(data: dict) -> list[tuple[str, tuple[str, Image.Image, Image.Image]]]:
+    key1, key2 = data["key"]
+    instruction = data["instruction"]
+    
+    input_image = data["input_image"].convert("RGB")
+    output_image1 = data["output_images"][0].convert("RGB")
+    output_image2 = data["output_images"][1].convert("RGB")
+
+    return [
+        (key1, (instruction, input_image, output_image1)),
+        (key2, (instruction, input_image, output_image2)),
+    ]
 
 def load_pairs_dataset_multithreaded(dataset: Dataset, max_workers: int = None) -> Dict[str, Tuple[str, Image.Image, Image.Image]]:
     if max_workers is None:
-        max_workers = min(32, (os.cpu_count() or 1) * 5)
+        # max_workers = min(32, (os.cpu_count() or 1) * 5)  
+        max_workers = os.cpu_count() or 1
 
     pairs = {}
     
-
-    def _process_item(data: dict) -> list[tuple[str, tuple[str, Image.Image, Image.Image]]]:
-        key1, key2 = data["key"]
-        instruction = data["instruction"]
-        
-        input_image = data["input_image"].convert("RGB")
-        output_image1 = data["output_images"][0].convert("RGB")
-        output_image2 = data["output_images"][1].convert("RGB")
-
-        return [
-            (key1, (instruction, input_image, output_image1)),
-            (key2, (instruction, input_image, output_image2)),
-        ]
-    
     print(f"Processing dataset (length: {len(dataset)}) with {max_workers} threads", flush=True)
     
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         results_iterator = tqdm(
-            executor.map(_process_item, dataset), 
+            executor.map(_load_item, dataset), 
             total=len(dataset), 
             desc="Processing dataset with multiple threads"
         )
@@ -237,10 +236,12 @@ def main(args):
         score1 = all_scores[key1][dimension]
         score2 = all_scores[key2][dimension]
         data["score"] = [score1, score2]
+        
+        input_image_path = os.path.join(args.result_dir, "images", f"{key1}_input.png")
+        output_image_path1 = os.path.join(args.result_dir, "images", f"{key1}")
+        output_image_path2 = os.path.join(args.result_dir, "images", f"{key2}.png")
 
-        input_image_path = os.path.join(args.result_dir, "input_images", f"{key1}_input.png")
-        output_image_path1 = os.path.join(args.result_dir, "output_images", f"{key1}_output0.png")
-        output_image_path2 = os.path.join(args.result_dir, "output_images", f"{key2}_output1.png")
+        os.makedirs(os.path.dirname(input_image_path), exist_ok=True)
 
         data['input_image'].save(input_image_path)
         data['output_images'][0].save(output_image_path1)
