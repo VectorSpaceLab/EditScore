@@ -87,7 +87,7 @@ pip install torch==2.7.1 torchvision --extra-index-url https://download.pytorch.
 pip install -r requirements.txt
 
 # EditScore runs even without vllm, though we recommend install it for best performance.
-pip install vllm --no-build-isolation
+pip install vllm
 ```
 
 #### 🌏 For users in Mainland China
@@ -98,6 +98,9 @@ pip install torch==2.7.1 torchvision --index-url https://mirror.sjtu.edu.cn/pyto
 
 # Install other dependencies from Tsinghua mirror
 pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# EditScore runs even without vllm, though we recommend install it for best performance.
+pip install vllm -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ---
