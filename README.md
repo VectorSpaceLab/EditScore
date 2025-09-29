@@ -85,6 +85,9 @@ pip install torch==2.7.1 torchvision --extra-index-url https://download.pytorch.
 
 # 3.2 Install other required packages
 pip install -r requirements.txt
+
+# EditScore runs even without vllm, though we recommend install it for best performance.
+pip install vllm --no-build-isolation
 ```
 
 #### 🌏 For users in Mainland China
