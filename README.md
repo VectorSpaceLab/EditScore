@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://vectorspacelab.github.io/EditScore"><img src="https://img.shields.io/badge/Project%20Page-EditScore-yellow" alt="project page"></a>
-  <a href="https://arxiv.org/abs/2506.18871"><img src="https://img.shields.io/badge/arXiv%20paper-2506.18871-b31b1b.svg" alt="arxiv"></a>
+  <a href="https://arxiv.org/abs/2509.23909"><img src="https://img.shields.io/badge/arXiv%20paper-2509.23909-b31b1b.svg" alt="arxiv"></a>
   <a href="https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe"><img src="https://img.shields.io/badge/EditScore-🤗-yellow" alt="model"></a>
   <a href="https://huggingface.co/datasets/EditScore/EditReward-Bench"><img src="https://img.shields.io/badge/EditReward--Bench-🤗-yellow" alt="dataset"></a>
 </p>
@@ -152,7 +152,7 @@ If you find this repository or our work useful, please consider giving a star �
 @article{luo2025editscore,
   title={EditScore: Unlocking Online RL for Image Editing via High-Fidelity Reward Modeling},
   author={Xin Luo and Jiahao Wang and Chenyuan Wu and Shitao Xiao and Xiyan Jiang and Defu Lian and Jiajun Zhang and Dong Liu and Zheng Liu},
-  journal={arXiv preprint arXiv:},
+  journal={arXiv preprint arXiv:2509.23909},
   year={2025}
 }
 ```

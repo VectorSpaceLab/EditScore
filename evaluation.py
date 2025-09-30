@@ -238,7 +238,7 @@ def main(args):
         data["score"] = [score1, score2]
         
         input_image_path = os.path.join(args.result_dir, "images", f"{key1}_input.png")
-        output_image_path1 = os.path.join(args.result_dir, "images", f"{key1}")
+        output_image_path1 = os.path.join(args.result_dir, "images", f"{key1}.png")
         output_image_path2 = os.path.join(args.result_dir, "images", f"{key2}.png")
 
         os.makedirs(os.path.dirname(input_image_path), exist_ok=True)
