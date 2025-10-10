@@ -60,6 +60,9 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 
 ## 📌 TODO
 We are actively working on improving EditScore and expanding its capabilities. Here's what's next:
+
+
+- [ ] Release training data for reward model and online RL.
 - [ ] Release RL training code applying EditScore to OmniGen2.
 - [ ] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
 
