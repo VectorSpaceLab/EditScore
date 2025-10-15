@@ -171,7 +171,8 @@ bash evaluate_vllm.sh
 We offer two example use cases for your exploration:
 - **Best-of-N selection**: Use EditScore to automatically pick the most preferred image among multiple candidates.
 - **Reinforcement fine-tuning**: Use EditScore as a reward model to guide RL-based optimization.
-For detailed instructions and examples, please refer to the [documentation](experiments/OmniGen2-RL/docs/README.md).
+
+For detailed instructions and examples, please refer to the [documentation](experiments/OmniGen2-RL/README.md).
 
 ## ❤️ Citing Us
 If you find this repository or our work useful, please consider giving a star ⭐ and citation 🦖, which would be greatly appreciated:
