@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" width="65%">
+  <img src="https://raw.githubusercontent.com/VectorSpaceLab/EditScore/refs/heads/main/assets/logo.png" width="65%">
 </p>
 
 <p align="center">
@@ -26,8 +26,9 @@
 - **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
-- **2025-09-30**: We release **OmniGen2-EditScore7B**, unlocking online RL For Image Editing via high-fidelity EditScore. LoRA weights are available at [Hugging Face](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B) and [ModelScope](https://www.modelscope.cn/models/OmniGen2/OmniGen2-EditScore7B).
-- **2025-09-30**: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench), and on ModelScope: [Models Collection](https://www.modelscope.cn/collections/EditScore-8b0d53aa945d4e) and [Benchmark Dataset](https://www.modelscope.cn/datasets/EditScore/EditReward-Bench).
+- **2025-10-12**: Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit are now available!
+- 2025-09-30: We release **OmniGen2-EditScore7B**, unlocking online RL For Image Editing via high-fidelity EditScore. LoRA weights are available at [Hugging Face](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B) and [ModelScope](https://www.modelscope.cn/models/OmniGen2/OmniGen2-EditScore7B).
+- 2025-09-30: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench), and on ModelScope: [Models Collection](https://www.modelscope.cn/collections/EditScore-8b0d53aa945d4e) and [Benchmark Dataset](https://www.modelscope.cn/datasets/EditScore/EditReward-Bench).
 
 ## 📖 Introduction
 While Reinforcement Learning (RL) holds immense potential for this domain, its progress has been severely hindered by the absence of a high-fidelity, efficient reward signal.
@@ -39,7 +40,7 @@ To overcome this barrier, we provide a systematic, two-part solution:
 - **A Powerful & Versatile Tool**: Guided by our benchmark, we developed the **EditScore** model series. Through meticulous data curation and an effective self-ensembling strategy, EditScore sets a new state of the art for open-source reward models, even surpassing the accuracy of leading proprietary VLMs.
 
 <p align="center">
-  <img src="assets/table_reward_model_results.png" width="95%">
+  <img src="https://raw.githubusercontent.com/VectorSpaceLab/EditScore/refs/heads/main/assets/table_reward_model_results.png" width="95%">
   <br>
   <em>Benchmark results on EditReward-Bench.</em>
 </p>
@@ -52,7 +53,7 @@ We demonstrate the practical utility of EditScore through two key applications:
 This repository releases both the **EditScore** models and the **EditReward-Bench** dataset to facilitate future research in reward modeling, policy optimization, and AI-driven model improvement.
 
 <p align="center">
-  <img src="assets/figure_edit_results.png" width="95%">
+  <img src="https://raw.githubusercontent.com/VectorSpaceLab/EditScore/refs/heads/main/assets/figure_edit_results.png" width="95%">
   <br>
   <em>EditScore as a superior reward signal for image editing.</em>
 </p>
@@ -64,45 +65,57 @@ We are actively working on improving EditScore and expanding its capabilities. H
 
 - [ ] Release training data for reward model and online RL.
 - [ ] Release RL training code applying EditScore to OmniGen2.
-- [ ] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
+- [x] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
 
 ## 🚀 Quick Start
 
 ### 🛠️ Environment Setup
+We offer two ways to install EditScore. Choose the one that best fits your needs.
+**Method 1: Install from PyPI (Recommended for Users)**: If you want to use EditScore as a library in your own project.
+**Method 2: Install from Source (For Developers)**: If you plan to contribute to the code, modify it, or run the examples in this repository
 
-#### ✅ Recommended Setup
-
+#### Prerequisites: Installing PyTorch
+Both installation methods require PyTorch to be installed first, as its version is dependent on your system's CUDA setup.
 ```bash
-# 1. Clone the repo
-git clone git@github.com:VectorSpaceLab/EditScore.git
-cd EditScore
-
-# 2. (Optional) Create a clean Python environment
+# (Optional) Create a clean Python environment
 conda create -n editscore python=3.12
 conda activate editscore
 
-# 3. Install dependencies
-# 3.1 Install PyTorch (choose correct CUDA version)
+# Choose the command that matches your CUDA version.
+# This example is for CUDA 12.6.
 pip install torch==2.7.1 torchvision --extra-index-url https://download.pytorch.org/whl/cu126
+````
 
-# 3.2 Install other required packages
-pip install -r requirements.txt
-
-# EditScore runs even without vllm, though we recommend install it for best performance.
-pip install vllm
-```
-
-#### 🌏 For users in Mainland China
-
+<details>
+<summary>🌏 For users in Mainland China</summary>
 ```bash
 # Install PyTorch from a domestic mirror
 pip install torch==2.7.1 torchvision --index-url https://mirror.sjtu.edu.cn/pytorch-wheels/cu126
+```
+</details>
 
-# Install other dependencies from Tsinghua mirror
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+#### Method 1: Install from PyPI (Recommended for Users)
+```bash
+pip install -U editscore
+```
 
-# EditScore runs even without vllm, though we recommend install it for best performance.
-pip install vllm -i https://pypi.tuna.tsinghua.edu.cn/simple
+#### Method 2: Install from Source (For Developers)
+This method gives you a local, editable version of the project.
+1. Clone the repository
+```bash
+git clone https://github.com/VectorSpaceLab/EditScore.git
+cd EditScore
+```
+
+2. Install EditScore in editable mode
+```bash
+pip install -e .
+```
+
+#### ✅ (Recommended) Install Optional High-Performance Dependencies
+For the best performance, especially during inference, we highly recommend installing vllm.
+```bash
+pip install vllm
 ```
 
 ---
@@ -139,6 +152,12 @@ print(f"Edit Score: {result['final_score']}")
 ---
 
 ## 📊 Benchmark Your Image-Editing Reward Model
+#### Install benchmark dependencies
+To use example code for benchmark, run following
+```bash
+pip install -r requirements.txt
+```
+
 We provide an evaluation script to benchmark reward models on **EditReward-Bench**. To evaluate your own custom reward model, simply create a scorer class with a similar interface and update the script.
 ```bash
 # This script will evaluate the default EditScore model on the benchmark
@@ -147,6 +166,12 @@ bash evaluate.sh
 # Or speed up inference with VLLM
 bash evaluate_vllm.sh
 ```
+
+## Apply EditScore to Image Editing
+We offer two example use cases for your exploration:
+- **Best-of-N selection**: Use EditScore to automatically pick the most preferred image among multiple candidates.
+- **Reinforcement fine-tuning**: Use EditScore as a reward model to guide RL-based optimization.
+For detailed instructions and examples, please refer to the [documentation](experiments/OmniGen2-RL/docs/README.md).
 
 ## ❤️ Citing Us
 If you find this repository or our work useful, please consider giving a star ⭐ and citation 🦖, which would be greatly appreciated:

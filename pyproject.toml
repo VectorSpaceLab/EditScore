@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "editscore"
+version = "0.1.2"
+authors = [
+  { name="Xin Luo", email="xinluo@mail.ustc.edu.cn" },
+  { name="Jiahao Wang", email="jiahaowang0917@gmail.com" },
+  { name="Chenyuan Wu", email="wuchenyuan@mail.ustc.edu.cn" },
+]
+description = "A high-fidelity reward model for instruction-based image editing."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License", # 假设是 Apache 2.0
+    "Operating System :: OS Independent",
+]
+# 这里列出 EditScore 核心库的依赖
+dependencies = [
+    "torch",
+    "torchvision",
+    "accelerate",
+    "transformers",
+    "qwen-vl-utils",
+    "peft",
+    "Pillow",
+]
+
+[project.urls]
+Homepage = "https://github.com/VectorSpaceLab/EditScore"
+Issues = "https://github.com/VectorSpaceLab/EditScore/issues"
+
+[tool.setuptools.packages.find]
+# 自动发现名为 'editscore' 的包（即 editscore/ 目录）
+where = ["."]
