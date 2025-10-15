@@ -24,7 +24,7 @@ This acts as a powerful "reranker" that filters out suboptimal results, signific
 ### How to Use
 We provide ready-to-use scripts to perform a full Best-of-N workflow on the GEdit-Bench benchmark. The following instructions use **OmniGen2** as the base model, but we provide similar scripts for **FLUX-Kontext** and **Qwen-Image-Edit** in the `evaluation/GEdit-Bench/` directory.
 
-**1.Generate Candidates**
+**1. Generate Candidates**
 ```bash
 bash evaluation/GEdit-Bench/omnigen2_16samples.sh # default using 8 GPUs
 ```
@@ -50,7 +50,7 @@ bash evaluation/GEdit-Bench/omnigen2_16samples.sh --world_size 4 --rank 1
 - **Monitoring Progress**: The scripts utilize nohup for background execution. We recommend monitoring the file (specified in the script file) to track the status and progress of the generation process.
 </details>
 
-**2.Score and Select**
+**2. Score and Select**
 Next, use EditScore to evaluate all N candidates and identify the one with the highest score.
 
 ```bash
@@ -58,7 +58,7 @@ bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass1.sh # 
 bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass4.sh # EditScore-7B, Avg@4
 ```
 
-**3.Evaluate the Final Selections**
+**3. Evaluate the Final Selections**
 Finally, evaluate the performance of the images selected by EditScore on GEdit-Bench to quantify the improvement.
 ```bash
 bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass1_eval.sh
