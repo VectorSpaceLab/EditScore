@@ -66,3 +66,6 @@ bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass4_eval.
 ```
 
 By comparing these results to the baseline performance of the original model, you will see the benefits of applying EditScore as a reranker.
+
+## Application 2: Reinforcement Fine-Tuning
+TBD.
