@@ -7,7 +7,7 @@ This guide covers two primary downstream applications:
 2. **Reinforcement Learning (RL) Fine-Tuning**: Using EditScore as a high-fidelity reward signal to train models for significantly better performance.
 
 ## 🛠️ Setup for Examples
-The examples require libraries for RL (trl, peft), data handling, and potentially experiment tracking.
+The examples require libraries for RL, data handling, and potentially experiment tracking.
 ```bash
 # Navigate to this directory if you are in the root
 cd examples/OmniGen2-RL
@@ -35,6 +35,7 @@ bash evaluation/GEdit-Bench/omnigen2_16samples.sh
 
 <details>
 <summary><strong>👉 Click here for tips on the usage of the script</strong></summary>
+
 - **Distributed Inference**: Our scripts natively support multi-machine and multi-GPU execution. To run inference across 4 machines, for example, execute the following commands on each respective machine:
 ```bash
 # On the first machine (rank 0)
