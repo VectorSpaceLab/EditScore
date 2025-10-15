@@ -48,6 +48,7 @@ bash evaluation/GEdit-Bench/omnigen2_16samples.sh --world_size 4 --rank 1
 ```
 
 - **Monitoring Progress**: The scripts utilize nohup for background execution. We recommend monitoring the file (specified in the script file) to track the status and progress of the generation process.
+</details>
 
 **2.Score and Select**
 Next, use EditScore to evaluate all N candidates and identify the one with the highest score.
@@ -57,9 +58,11 @@ bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass1.sh # 
 bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass4.sh # EditScore-7B, Avg@4
 ```
 
-**3.Evaluate**
-Next, evaluate on GEdit-Bench see the benefits of applying EditScore.
+**3.Evaluate the Final Selections**
+Finally, evaluate the performance of the images selected by EditScore on GEdit-Bench to quantify the improvement.
 ```bash
 bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass1_eval.sh
 bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass4_eval.sh
 ```
+
+By comparing these results to the baseline performance of the original model, you will see the benefits of applying EditScore as a reranker.
