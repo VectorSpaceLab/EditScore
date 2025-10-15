@@ -26,7 +26,7 @@ We provide ready-to-use scripts to perform a full Best-of-N workflow on the GEdi
 
 **1.Generate Candidates**
 ```bash
-bash evaluation/GEdit-Bench/omnigen2_16samples.sh
+bash evaluation/GEdit-Bench/omnigen2_16samples.sh # default using 8 GPUs
 ```
 
 > **⚠️ Important Note on Resource Usage**
@@ -47,7 +47,6 @@ bash evaluation/GEdit-Bench/omnigen2_16samples.sh --world_size 4 --rank 1
 # ...and so on for ranks 2 and 3.
 ```
 
-- **GPU Configuration**: You can adjust the number of GPUs used per machine by modifying the num_gpus_per_machine variable inside the script.
 - **Monitoring Progress**: The scripts utilize nohup for background execution. We recommend monitoring the file (specified in the script file) to track the status and progress of the generation process.
 
 **2.Score and Select**

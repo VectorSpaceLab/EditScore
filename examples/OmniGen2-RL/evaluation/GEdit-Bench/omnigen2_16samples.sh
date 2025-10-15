@@ -46,7 +46,7 @@ echo "WORLD_SIZE: $WORLD_SIZE"
 global_shift_index=0
 total_num_images=606
 
-num_gpus_per_machine=8
+num_gpus_per_machine=$(python -c "import torch; print(torch.cuda.device_count())")
 # Calculate images per machine, rounding up to ensure all data is covered
 num_images_per_machine=$(( (total_num_images + WORLD_SIZE - 1) / WORLD_SIZE ))
 shift_index=$((RANK * num_images_per_machine))
