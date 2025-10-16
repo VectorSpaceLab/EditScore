@@ -234,3 +234,6 @@ test.py
 
 upload_to_huggingface.py
 upload_to_modelscope.py
+
+editscore.egg-info/
+dist/
