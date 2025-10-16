@@ -7,6 +7,8 @@
   <a href="https://arxiv.org/abs/2509.23909"><img src="https://img.shields.io/badge/arXiv%20paper-2509.23909-b31b1b.svg" alt="arxiv"></a>
   <a href="https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe"><img src="https://img.shields.io/badge/EditScore-🤗-yellow" alt="model"></a>
   <a href="https://huggingface.co/datasets/EditScore/EditReward-Bench"><img src="https://img.shields.io/badge/EditReward--Bench-🤗-yellow" alt="dataset"></a>
+  <a href="https://huggingface.co/datasets/EditScore/EditScore-Reward-Data"><img src="https://img.shields.io/badge/EditScore--Reward--Data-🤗-yellow" alt="dataset"></a>
+  <a href="https://huggingface.co/datasets/EditScore/EditScore-RL-Data"><img src="https://img.shields.io/badge/EditScore--RL--Data-🤗-yellow" alt="dataset"></a>
 </p>
 
 <h4 align="center">
@@ -26,6 +28,7 @@
 - **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
+- **2025-10-16**: Training datasets [EditScore-Reward-Data](https://huggingface.co/datasets/EditScore/EditScore-Reward-Data) and [EditScore-RL-Data](https://huggingface.co/datasets/EditScore/EditScore-RL-Data) are available.
 - **2025-10-15**: **EditScore** is now available on PyPI — install it easily with `pip install editscore`.
 - **2025-10-15**: Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit are now available! See [this](#apply-editscore-to-image-editing) for details.
 - 2025-09-30: We release **OmniGen2-EditScore7B**, unlocking online RL For Image Editing via high-fidelity EditScore. LoRA weights are available at [Hugging Face](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B) and [ModelScope](https://www.modelscope.cn/models/OmniGen2/OmniGen2-EditScore7B).
@@ -64,7 +67,7 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 We are actively working on improving EditScore and expanding its capabilities. Here's what's next:
 
 
-- [ ] Release training data for reward model and online RL.
+- [x] Release training data for reward model and online RL.
 - [ ] Release RL training code applying EditScore to OmniGen2.
 - [x] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
 
