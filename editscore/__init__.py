@@ -99,8 +99,8 @@ class EditScore:
                 if result_SC in ["I'm sorry, but I can't assist with that request."] or result_PQ in ["I'm sorry, but I can't assist with that request."]:
                     guess_if_cannot_parse = True
                     
-                SC_dict = mllm_output_to_dict(result_SC, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt)
-                PQ_dict = mllm_output_to_dict(result_PQ, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt)
+                SC_dict = mllm_output_to_dict(result_SC, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt, score_range=self.score_range)
+                PQ_dict = mllm_output_to_dict(result_PQ, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt, score_range=self.score_range)
 
             if SC_dict == "rate_limit_exceeded" or PQ_dict == "rate_limit_exceeded":
                 print("rate_limit_exceeded") 
