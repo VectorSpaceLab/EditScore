@@ -92,6 +92,7 @@ class EditScore:
             while SC_dict is False or PQ_dict is False:
                 tries += 1
                 guess_if_cannot_parse = True if tries > max_tries else False
+
                 result_SC = self.model.inference(SC_prompt_final, seed=self.seed + i)
                 result_PQ = self.model.inference(PQ_prompt_final, seed=self.seed + i)
 

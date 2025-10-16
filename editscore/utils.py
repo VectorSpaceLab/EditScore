@@ -211,6 +211,11 @@ def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None):
     if input_string == "rate_limit_exceeded":
         return "rate_limit_exceeded"
 
+    if give_up_parsing:
+        guessed_value = random.randint(0, 10)
+        json_content = {'score': [guessed_value], "reasoning": f"guess_if_cannot_parse | {input_string}"}
+        return json_content
+    
     # Define the delimiters
     delimiter = '||V^=^V||'
 
@@ -233,15 +238,7 @@ def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None):
             # this time we will just get the scores and ignore the reasoning (other part of the json)
             start_index = input_string.find('[')
             end_index = input_string.rfind(']') + 1
-            if give_up_parsing: # if we want to give up parsing
-                guessed_value = random.randint(0, 10)
-                print(f"1111 Failed to find the json content in the string. Guess a value : {text_prompt=} {input_string=} {guessed_value=}.", flush=True)
-                json_content = {'score': [guessed_value], "reasoning": f"guess_if_cannot_parse | {input_string}"}
-                json_str = json.dumps(json_content)
-                input_string = json_str
-                start_index = 0
-                end_index = len(json_str)
-            elif re.match(r'^\[\d+, ?\d+\]$', input_string[start_index:end_index]):
+            if re.match(r'^\[\d+, ?\d+\]$', input_string[start_index:end_index]):
                 scores = json.loads(input_string[start_index:end_index])
                 if not isinstance(scores, list):
                     scores = [scores]
