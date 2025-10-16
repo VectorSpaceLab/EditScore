@@ -213,7 +213,7 @@ def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None, s
 
     if give_up_parsing:
         guessed_value = random.randint(0, score_range)
-        json_content = {'score': [guessed_value], "reasoning": f"guess_if_cannot_parse | {input_string}"}
+        json_content = {'score': [guessed_value, guessed_value], "reasoning": f"guess_if_cannot_parse | {input_string}"}
         return json_content
     
     # Define the delimiters
