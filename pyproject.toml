@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "editscore"
-version = "0.1.6"
+version = "0.1.7"
 authors = [
   { name="Xin Luo", email="xinluo@mail.ustc.edu.cn" },
   { name="Jiahao Wang", email="jiahaowang0917@gmail.com" },
