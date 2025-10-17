@@ -200,6 +200,84 @@ def normalize_quotes(s: str) -> str:
     # 常见的几种智能引号 U+201C U+201D U+2018 U+2019
     return s.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
 
+def fallback_repair_json(input_str: str) -> str:
+    """
+    A last-resort JSON repair function.
+    It tries to reconstruct a valid JSON object with the target structure:
+        {"reasoning": "...", "score": [float, float]}
+    even if the original input string is heavily corrupted.
+
+    Args:
+        input_str (str): Possibly malformed JSON string.
+
+    Returns:
+        str: A repaired and valid JSON string.
+    """
+
+    # 1. Try to extract the reasoning text between "reasoning" and "score"
+    reasoning_match = re.search(
+        r'"?reasoning"?\s*[:：]\s*["\']?(.*?)["\']?\s*,\s*"?score"?',
+        input_str,
+        re.DOTALL | re.IGNORECASE,
+    )
+
+    if reasoning_match:
+        reasoning_text = reasoning_match.group(1).strip()
+    else:
+        # If not found, fallback to an empty string
+        reasoning_text = ""
+
+    # 2. Clean and normalize the reasoning content
+    reasoning_text = reasoning_text.replace('\\"', '"')  # Unescape existing escapes
+    reasoning_text = re.sub(r'["“”]', '"', reasoning_text)  # Normalize quotes
+    reasoning_text = reasoning_text.strip()
+    # Escape any remaining unescaped double quotes to avoid breaking JSON
+    reasoning_text = reasoning_text.replace('"', '\\"')
+
+    # 3. Try to extract the score list (two floats)
+    score_match = re.search(
+        r'"?score"?\s*[:：]\s*\[?([^\]]+)\]?', input_str, re.DOTALL | re.IGNORECASE
+    )
+    scores = []
+    if score_match:
+        # Extract numeric values using regex
+        nums = re.findall(r"-?\d+(?:\.\d+)?", score_match.group(1))
+        try:
+            scores = [float(n) for n in nums[:2]]
+        except ValueError:
+            pass
+
+    # Fill missing values with default zeros
+    if len(scores) < 2:
+        scores += [0.0] * (2 - len(scores))
+
+    # 4. Construct the repaired JSON object
+    repaired_obj = {"reasoning": reasoning_text, "score": scores}
+
+    # 5. Return a valid JSON string
+    return json.dumps(repaired_obj, ensure_ascii=False)
+
+def robust_json_fix(s: str):
+    try:
+        return json.loads(s)
+    except Exception:
+        pass
+    
+    for fixer in [fix_json, repair_reasoning_field_robust]:
+        s = fixer(s)
+        try:
+            return json.loads(s)
+        except Exception:
+            print(f"Error: Cannot fix {fixer.__name__} {s=}")
+            continue
+
+    try:
+        repaired_str = fallback_repair_json(s)
+        return json.loads(repaired_str)
+    except Exception as e:
+        print(f"Error: Cannot fix fallback_repair_json {s=} {e=}")
+        return False
+
 #+=========================================================================================
 def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None, score_range: int = 10):
     """
@@ -271,17 +349,20 @@ def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None, s
                 new_data['score'] = [new_data['score']]
         except Exception as e1:
             print(f"Now fixing: {e1=} {json_str=}")
-            try:
-                new_data = json.loads(fix_json(json_str))
-                return new_data
-            except Exception as e2:
-                try:
-                    print(f"Now fixing: {e2=} {fix_json(json_str)=}")
-                    new_data = json.loads(repair_reasoning_field_robust(fix_json(json_str)))
-                    return new_data
-                except Exception as e3:
-                    print(f"Error: Cannot fix {e3=} {repair_reasoning_field_robust(fix_json(json_str))=}")
-                    return False
+            
+            new_data = robust_json_fix(json_str)
+
+            # try:
+            #     new_data = json.loads(fix_json(json_str))
+            #     return new_data
+            # except Exception as e2:
+            #     try:
+            #         print(f"Now fixing: {e2=} {fix_json(json_str)=}")
+            #         new_data = json.loads(repair_reasoning_field_robust(fix_json(json_str)))
+            #         return new_data
+            #     except Exception as e3:
+            #         print(f"Error: Cannot fix {e3=} {repair_reasoning_field_robust(fix_json(json_str))=}")
+            #         return False
         return new_data
     else:
         print("The required delimiters were not found correctly in the string.")
