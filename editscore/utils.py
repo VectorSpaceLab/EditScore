@@ -30,46 +30,49 @@ def fix_json(input_str):
 
 def repair_reasoning_field_robust(json_str: str) -> str:
     """
-    使用正则表达式和先行断言，健壮地修复 "reasoning" 字段内部未转义的双引号。
-    此方法可以处理 "reasoning" 字段不是最后一个字段的情况。
+    Robustly repair unescaped double quotes inside the "reasoning" field of a JSON string.
+    This function uses regular expressions and a lookahead assertion to locate
+    the end of the "reasoning" value, even if it is not the last field in the JSON.
 
     Args:
-        json_str: 可能包含格式错误的JSON字符串。
+        json_str (str): A possibly malformed JSON string that may contain
+                        unescaped quotes within the "reasoning" field.
 
     Returns:
-        修复后的JSON字符串。
+        str: A repaired JSON string with properly escaped quotes inside "reasoning".
     """
-    # 1. 定义新的正则表达式，使用正向先行断言来定位 "reasoning" 值的结束位置
-    # re.DOTALL 标志让 '.' 可以匹配包括换行符在内的任意字符
+    # 1. Define a regex pattern that locates the reasoning value using a lookahead.
+    # The re.DOTALL flag allows '.' to match newline characters.
     pattern = re.compile(
-        # --- 第1个捕获组: reasoning 字段的 "前缀" ---
+        # --- Group 1: prefix part including the "reasoning" key and opening quote ---
         r'("reasoning"\s*:\s*")'
         
-        # --- 第2个捕获组: reasoning 字段的 "内容" ---
+        # --- Group 2: content inside the reasoning string (non-greedy) ---
         r'(.*?)'
         
-        # --- 正向先行断言: 寻找值的结束边界，但不消耗它 ---
-        # 匹配到 "reasoning" 值的结束双引号，这个双引号后面必须跟着一个逗号或一个右花括号
+        # --- Lookahead assertion ---
+        # Match the ending quote of the "reasoning" value,
+        # but only if it is followed by a comma or closing brace.
         r'(?="\s*[,}])',
         
         re.DOTALL
     )
 
-    # 2. 定义一个更简单的替换函数
+    # 2. Define a replacement function to escape quotes inside the "reasoning" content.
     def replacer(match):
-        # 提取出两个捕获组
-        prefix = match.group(1)      # 例如: '"reasoning" : "'
-        content = match.group(2)     # 例如: 'Overall building...'
-        
-        # 只在 "内容" 部分进行替换，将所有双引号转义
+        prefix = match.group(1)   # e.g., '"reasoning": "'
+        content = match.group(2)  # e.g., 'Overall building...'
+
+        # Escape all unescaped double quotes inside the reasoning text.
         fixed_content = content.replace('"', '\\"')
-        
-        # 重新组合。注意：我们不需要处理后缀，因为它没有被匹配和消耗掉。
+
+        # Reassemble the full matched segment. The suffix is not consumed by the pattern,
+        # so we just return the prefix + repaired content.
         return prefix + fixed_content
 
-    # 3. 使用 re.sub 执行查找和替换
+    # 3. Apply the regex substitution across the entire JSON string.
     repaired_str = pattern.sub(replacer, json_str)
-    
+
     return repaired_str
 
 def read_file_to_string(file_path):
@@ -202,59 +205,104 @@ def normalize_quotes(s: str) -> str:
 
 def fallback_repair_json(input_str: str) -> str:
     """
-    A last-resort JSON repair function.
-    It tries to reconstruct a valid JSON object with the target structure:
-        {"reasoning": "...", "score": [float, float]}
-    even if the original input string is heavily corrupted.
+    Last-resort JSON repair that tries to preserve the 'reasoning' text
+    even when it contains unescaped quotes or other corruption.
 
-    Args:
-        input_str (str): Possibly malformed JSON string.
+    Target output:
+      {"reasoning": "<text>", "score": [float, float]}
 
-    Returns:
-        str: A repaired and valid JSON string.
+    Approach:
+      1. Locate 'reasoning' key position and 'score' key position.
+      2. Extract the raw substring between them (reasoning_raw).
+      3. Clean only the outer noise (leading/trailing quotes, commas, braces),
+         but preserve internal punctuation.
+      4. Unescape common escape sequences and normalize quotes.
+      5. Extract numeric scores robustly.
+      6. Return a valid JSON string.
     """
 
-    # 1. Try to extract the reasoning text between "reasoning" and "score"
-    reasoning_match = re.search(
-        r'"?reasoning"?\s*[:：]\s*["\']?(.*?)["\']?\s*,\s*"?score"?',
-        input_str,
-        re.DOTALL | re.IGNORECASE,
-    )
+    s = input_str
 
-    if reasoning_match:
-        reasoning_text = reasoning_match.group(1).strip()
-    else:
-        # If not found, fallback to an empty string
-        reasoning_text = ""
+    # Normalize whitespace for easier searching (but keep original for slicing)
+    lowered = s.lower()
 
-    # 2. Clean and normalize the reasoning content
-    reasoning_text = reasoning_text.replace('\\"', '"')  # Unescape existing escapes
-    reasoning_text = re.sub(r'["“”]', '"', reasoning_text)  # Normalize quotes
-    reasoning_text = reasoning_text.strip()
-    # Escape any remaining unescaped double quotes to avoid breaking JSON
-    reasoning_text = reasoning_text.replace('"', '\\"')
+    # 1) find the start of reasoning key (case-insensitive)
+    m_reason = re.search(r'"?reasoning"?\s*[:：]', lowered)
+    m_score = re.search(r'"?score"?\s*[:：]', lowered)
 
-    # 3. Try to extract the score list (two floats)
-    score_match = re.search(
-        r'"?score"?\s*[:：]\s*\[?([^\]]+)\]?', input_str, re.DOTALL | re.IGNORECASE
-    )
+    reasoning_text = ""
     scores = []
-    if score_match:
-        # Extract numeric values using regex
-        nums = re.findall(r"-?\d+(?:\.\d+)?", score_match.group(1))
+
+    if m_reason and m_score:
+        # compute the real indices in the original string
+        start_idx = m_reason.end()  # right after colon in 'reasoning:'
+        score_start_idx = m_score.start()
+
+        # 2) slice the original string between reasoning value start and score key start
+        reasoning_raw = s[start_idx:score_start_idx]
+
+        # 3) clean outer noise but preserve inner content:
+        #    - strip whitespace and outer commas/braces
+        reasoning_raw = reasoning_raw.strip()
+        # remove leading commas/braces/colons
+        reasoning_raw = re.sub(r'^[\s,{\[]+', '', reasoning_raw)
+        # remove trailing commas/braces/colons (but keep inner punctuation)
+        reasoning_raw = re.sub(r'[\s,}\]]+$', '', reasoning_raw)
+
+        # If the reasoning starts with a quote char, drop it (we'll re-escape later).
+        if reasoning_raw.startswith(("'", '"')):
+            reasoning_raw = reasoning_raw[1:]
+        # If it ends with a quote char (common), drop it.
+        if reasoning_raw.endswith(("'", '"')):
+            reasoning_raw = reasoning_raw[:-1]
+
+        # 4) normalize escapes:
+        # Replace common escaped sequences (\" -> "), but avoid creating unbalanced quotes.
+        reasoning_raw = reasoning_raw.replace('\\"', '"').replace("\\'", "'")
+        # Replace fancy quotes with straight quotes (optional)
+        reasoning_raw = re.sub(r'[“”]', '"', reasoning_raw)
+        reasoning_raw = re.sub(r"[‘’]", "'", reasoning_raw)
+
+        # Trim again
+        reasoning_text = reasoning_raw.strip()
+    else:
+        # If we couldn't find both keys, try a looser regex capturing 'reasoning' value
+        m_loose = re.search(r'"?reasoning"?\s*[:：]\s*["\']?(.*?)["\']?\s*(,|$)', s, re.DOTALL | re.IGNORECASE)
+        if m_loose:
+            reasoning_text = m_loose.group(1).strip()
+            # normalize escapes as above
+            reasoning_text = reasoning_text.replace('\\"', '"').replace("\\'", "'")
+            reasoning_text = re.sub(r'[“”]', '"', reasoning_text)
+            reasoning_text = re.sub(r"[‘’]", "'", reasoning_text)
+
+    # 5) Extract two numeric scores anywhere after the 'score' key (robust)
+    if m_score:
+        # slice from score key to the end
+        score_slice = s[m_score.end():]
+        # find numbers (integers or floats)
+        nums = re.findall(r'-?\d+(?:\.\d+)?', score_slice)
         try:
             scores = [float(n) for n in nums[:2]]
-        except ValueError:
-            pass
+        except Exception:
+            scores = []
+    else:
+        # fallback: try to find any two numbers in the whole string
+        nums = re.findall(r'-?\d+(?:\.\d+)?', s)
+        try:
+            scores = [float(n) for n in nums[:2]]
+        except Exception:
+            scores = []
 
-    # Fill missing values with default zeros
+    # Ensure we always return two floats
     if len(scores) < 2:
         scores += [0.0] * (2 - len(scores))
 
-    # 4. Construct the repaired JSON object
-    repaired_obj = {"reasoning": reasoning_text, "score": scores}
+    # 6) Construct final object. Let json.dumps handle escaping inside the reasoning.
+    repaired_obj = {
+        "reasoning": reasoning_text,
+        "score": scores
+    }
 
-    # 5. Return a valid JSON string
     return json.dumps(repaired_obj, ensure_ascii=False)
 
 def robust_json_fix(s: str):
