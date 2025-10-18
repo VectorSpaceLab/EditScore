@@ -1,6 +1,7 @@
 from typing import Optional
 
 import os
+import hashlib
 import random
 import time
 import numpy as np
@@ -56,8 +57,13 @@ class Qwen25VL():
 
         if self.enable_lora:
             if cache_dir is None:
-                root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-                cache_dir = os.path.join(root_dir, "cache", f"{os.path.basename(vlm_model)}_merged_lora")
+                root_dir = torch.hub.get_dir() # default: ~/.cache/torch/hub
+
+                lora_filename = os.path.splitext(os.path.basename(lora_path))[0]
+                lora_hash = hashlib.md5(lora_path.encode()).hexdigest()[:8]
+                lora_identifier = f"{lora_filename}_{lora_hash}"
+
+                cache_dir = os.path.join(root_dir, "EditScore", f"{os.path.basename(vlm_model)}_merged_lora_{lora_identifier}")
 
             if not os.path.exists(cache_dir):
                 print(f"Merging LORA to {vlm_model} and saving to {cache_dir}", flush=True)
@@ -121,3 +127,16 @@ class Qwen25VL():
             responses.append(instruction)
 
         return responses[0]
+
+
+    def batch_inference(self, messages, seed: Optional[int] = None):
+        seed = self.seed if seed is None else seed
+        sampling_params = SamplingParams(max_tokens=512, temperature=self.temperature, top_p=0.9, top_k=20, seed=seed)
+        outputs = self.model.generate(messages, sampling_params, use_tqdm=False)
+
+        responses = []
+        for output in outputs:
+            instruction = output.outputs[0].text.strip()
+            responses.append(instruction)
+
+        return responses

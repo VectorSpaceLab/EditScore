@@ -150,7 +150,6 @@ def parse_args():
     parser.add_argument("--max_num_seqs", type=int, default=32)
     parser.add_argument("--max_num_batched_tokens", type=int, default=1536)
     parser.add_argument("--enable_lora", action="store_true")
-    parser.add_argument("--lora_path", type=str, default="")
     parser.add_argument("--cache_dir", type=str, default=None)
     return parser.parse_args()
 
@@ -169,7 +168,7 @@ def main(args):
         max_num_seqs=args.max_num_seqs,
         max_num_batched_tokens=args.max_num_batched_tokens,
         num_pass=args.num_pass,
-        enable_lora=args.enable_lora,
+        enable_lora=True,
         lora_path=args.lora_path,
         cache_dir=args.cache_dir,
     )

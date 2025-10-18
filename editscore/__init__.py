@@ -8,6 +8,7 @@ from .utils import (
 import math
 from . import vie_prompts
 import numpy as np
+from .json_parser import parse_vlm_output_to_dict
 
 class EditScore:
     def __init__(
@@ -91,16 +92,16 @@ class EditScore:
             max_tries = 2
             while SC_dict is False or PQ_dict is False:
                 tries += 1
-                guess_if_cannot_parse = True if tries > max_tries else False
+                give_up_parsing = True if tries > max_tries else False
 
                 result_SC = self.model.inference(SC_prompt_final, seed=self.seed + i)
                 result_PQ = self.model.inference(PQ_prompt_final, seed=self.seed + i)
 
                 if result_SC in ["I'm sorry, but I can't assist with that request."] or result_PQ in ["I'm sorry, but I can't assist with that request."]:
-                    guess_if_cannot_parse = True
+                    give_up_parsing = True
                     
-                SC_dict = mllm_output_to_dict(result_SC, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt, score_range=self.score_range)
-                PQ_dict = mllm_output_to_dict(result_PQ, give_up_parsing=guess_if_cannot_parse, text_prompt=text_prompt, score_range=self.score_range)
+                SC_dict = mllm_output_to_dict(result_SC, give_up_parsing=give_up_parsing, text_prompt=text_prompt, score_range=self.score_range)
+                PQ_dict = mllm_output_to_dict(result_PQ, give_up_parsing=give_up_parsing, text_prompt=text_prompt, score_range=self.score_range)
 
             if SC_dict == "rate_limit_exceeded" or PQ_dict == "rate_limit_exceeded":
                 print("rate_limit_exceeded") 
@@ -136,3 +137,63 @@ class EditScore:
         if self.reduction == "average_first":
             output["overall"] = math.sqrt(output["prompt_following"] * output["perceptual_quality"])
         return output
+
+
+    def batch_evaluate(self, image_prompts, text_prompt):
+        SC_prompt = [self.SC_prompt.replace("<instruction>", _text_prompt) for _text_prompt in text_prompt]
+
+        SC_prompt = [self.model.prepare_input(image_prompt, _SC_prompt) for image_prompt, _SC_prompt in zip(image_prompts, SC_prompt)]
+        PQ_prompt = [self.model.prepare_input(image_prompt, self.PQ_prompt) for image_prompt in image_prompts]
+
+        outputs_multi_pass = [[] for _ in range(len(image_prompts))]
+        for i in range(self.num_pass):
+            results = self.model.batch_inference(SC_prompt + PQ_prompt, seed=self.seed + i)
+
+            SC_evaluations = [parse_vlm_output_to_dict(results[i]) for i in range(len(results) // 2)]
+            PQ_evaluations = [parse_vlm_output_to_dict(results[i]) for i in range(len(results) // 2, len(results))]
+
+            for idx, (SC_evaluation, PQ_evaluation) in enumerate(zip(SC_evaluations, PQ_evaluations)):
+                SC_scores = SC_evaluation["score"]
+                PQ_scores = PQ_evaluation["score"]
+
+                if len(SC_scores) == 0:
+                    SC_scores = [self.score_range / 2]
+                if len(PQ_scores) == 0:
+                    PQ_scores = [self.score_range / 2]
+
+                SC_score = min(SC_scores) / (self.score_range / 10)
+                PQ_score = min(PQ_scores) / (self.score_range / 10)
+                if SC_score < 0 or SC_score > 10:
+                    SC_score = self.score_range / 2
+                if PQ_score < 0 or PQ_score > 10:
+                    PQ_score = self.score_range / 2
+                O_score = math.sqrt(SC_score * PQ_score)
+
+                outputs_multi_pass[idx].append(
+                    {
+                        "SC_score": SC_score,
+                        "PQ_score": PQ_score,
+                        "O_score": O_score,
+                        "SC_score_reasoning": SC_evaluation["reasoning"],
+                        "PQ_score_reasoning": PQ_evaluation["reasoning"],
+                        "SC_raw_output": results[idx],
+                        "PQ_raw_output": results[len(results) // 2 + idx],
+                    }
+                )
+        
+        outputs = []
+        for idx, outputs_per_prompt in enumerate(outputs_multi_pass):
+            outputs.append(
+                {
+                    "SC_score": np.mean([output_per_pass["SC_score"] for output_per_pass in outputs_per_prompt]),
+                    "PQ_score": np.mean([output_per_pass["PQ_score"] for output_per_pass in outputs_per_prompt]),
+                    "O_score": np.mean([output_per_pass["O_score"] for output_per_pass in outputs_per_prompt]),
+                    "SC_score_reasoning": outputs_per_prompt[0]["SC_score_reasoning"],
+                    "PQ_score_reasoning": outputs_per_prompt[0]["PQ_score_reasoning"],
+                    "SC_raw_output": outputs_per_prompt[0]["SC_raw_output"],
+                    "PQ_raw_output": outputs_per_prompt[0]["PQ_raw_output"],
+                }
+            )
+            if self.reduction == "average_first":
+                outputs[-1]["O_score"] = math.sqrt(outputs[-1]["SC_score"] * outputs[-1]["PQ_score"])
+        return outputs
