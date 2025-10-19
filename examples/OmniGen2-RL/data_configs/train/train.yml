@@ -1,0 +1,7 @@
+ratio_type: inside_ratio
+
+data:
+  - 
+    path: 'data/rl.jsonl'
+    type: 'edit'
+    ratio: !!float 1

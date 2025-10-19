@@ -68,4 +68,40 @@ bash evaluation/GEdit-Bench/omnigen2_16samples_select_best_editscore_pass4_eval.
 By comparing these results to the baseline performance of the original model, you will see the benefits of applying EditScore as a reranker.
 
 ## Application 2: Reinforcement Fine-Tuning
-TBD.
+Use EditScore to provide a high-quality reward signal to train models for significantly better image editing performance. We employ the FlowGRPO algorithm combined with EditScore's accurate evaluation capabilities to achieve end-to-end reinforcement learning fine-tuning.
+
+### 1. Data and Model Download
+Download RL training data from [EditScore-RL-Data](https://huggingface.co/datasets/EditScore/EditScore-RL-Data), then put the `rl.jsonl` into `data/` and change its path in `data_configs/train/train.yml`
+
+Download the base model OmniGen2 form [OmniGen2](https://huggingface.co/OmniGen2/OmniGen2),then change the model file format to pytorch_model.bin and modify `model.pretrained_model_path` in `options/omnigen2_edit_rl.yml`
+
+### 2. Start Reward Server
+
+Before beginning training, you need to start the EditScore reward server to provide real-time reward signal evaluation for RL training.
+
+### 3. Start Training
+
+**Configure Training Parameters**
+
+Edit the `options/omnigen2_edit_rl.yml` configuration file, focusing on these key parameters:
+- `train.global_batch_size`: Global batch size (num_machines * num_unique_prompts_per_sampling * num_images_per_prompt)
+- `train.rl.num_images_per_prompt`: Rollout number of one prompt 
+- `train.rl.num_unique_prompts_per_sampling`: Number of global unique prompts
+
+
+**Launch Distributed Training**
+```bash
+# Single machine training (8*H100 GPUs)
+bash scripts/train/omnigen2_edit_rl.sh
+
+# Multi-machine distributed training
+```
+
+> **⚠️ Training Configuration Key Points**
+>
+> **Reward Server IP**: Ensure the `REWARD_SERVER_IP` environment variable in training scripts points to the correct reward server address
+
+
+### 4. Training Outputs and Monitoring
+
+Logs and saved model checkpoints in `experiments/`
