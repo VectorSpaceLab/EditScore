@@ -72,7 +72,11 @@ Use EditScore to provide a high-quality reward signal to train models for signif
 
 ### 1. Data and Model Download
 Download RL training data from [EditScore-RL-Data](https://huggingface.co/datasets/EditScore/EditScore-RL-Data), then put the `rl.jsonl` into `data/` and change its path in `data_configs/train/train.yml`
-
+To convert relative image paths to your absolute paths:
+```bash
+cd examples/OmniGen2-RL/data
+python process_jsonl.py --input path/to/input.jsonl --output path/to/output.jsonl --base-path /your/absolute/base/path
+```
 Download the base model OmniGen2 form [OmniGen2](https://huggingface.co/OmniGen2/OmniGen2),then change the model file format to pytorch_model.bin and modify `model.pretrained_model_path` in `options/omnigen2_edit_rl.yml`
 
 ### 2. Start Reward Server
