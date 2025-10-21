@@ -2,6 +2,6 @@ ratio_type: inside_ratio
 
 data:
   - 
-    path: 'data/rl.jsonl'
+    path: '/path/to/EditScore-RL-Data/rl_abs.jsonl'
     type: 'edit'
     ratio: !!float 1

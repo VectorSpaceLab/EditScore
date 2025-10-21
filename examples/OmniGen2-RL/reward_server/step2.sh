@@ -3,36 +3,27 @@ SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 cd $SHELL_FOLDER
 
 # uncomment this if you are using conda
-# source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
-# conda activate editscore
+source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
+conda activate editscore
+pip install -e /share/project/luoxin/projects2/EditScore
+pip install flask
 
-worker_host=job-96f2e55a-f22a-42d5-9a45-c81edeb54e88
-worker_num_machines=2
 machine_id=0
+config_path=examples/OmniGen2-RL/reward_server/server_configs/editscore_7B.yml
 model_name=editscore_7B
-max_workers_per_machine=8
-
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --model_name=*)
-            model_name="${1#*=}"
-            shift
-            ;;
-        --worker_host=*)
-            worker_host="${1#*=}"
-            shift
-            ;;
-        --worker_num_machines=*)
-            worker_num_machines="${1#*=}"
+        --config_path=*)
+            config_path="${1#*=}"
             shift
             ;;
         --machine_id=*)
             machine_id="${1#*=}"
             shift
             ;;
-        --max_workers_per_machine=*)
-            max_workers_per_machine="${1#*=}"
+        --model_name=*)
+            model_name="${1#*=}"
             shift
             ;;
         *)
@@ -42,5 +33,5 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-python reward_proxy.py --worker_host $worker_host --worker_base_port 18888 --worker_num_machines $worker_num_machines --max_workers_per_machine $max_workers_per_machine \
->logs/reward_proxy_${model_name}_workers${max_workers_per_machine}_machine${machine_id}.log 2>&1
+python reward_proxy.py --config_path ${config_path} \
+>logs/reward_proxy_${model_name}_machine${machine_id}.log 2>&1

@@ -48,14 +48,10 @@ class Qwen25VL():
         max_num_batched_tokens=1536,
         temperature: float = 0.7,
         seed: Optional[int] = None,
-        enable_lora: bool = False,
-        lora_path: str = "",
+        lora_path: Optional[str] = None,
         cache_dir: Optional[str] = None,
     ) -> None:
-        self.enable_lora = enable_lora
-        self.lora_path = lora_path
-
-        if self.enable_lora:
+        if lora_path:
             if cache_dir is None:
                 root_dir = torch.hub.get_dir() # default: ~/.cache/torch/hub
 

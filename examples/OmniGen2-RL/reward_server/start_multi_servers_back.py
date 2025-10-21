@@ -11,26 +11,39 @@ import signal
 import sys
 import argparse
 from multiprocessing import Process
-import yaml
+
+# Server configuration
+NUM_GPUS = 8
+BASE_PORT = 18086
+# HOST = "127.0.0.1"
+HOST = "0.0.0.0"
+MODEL_PATH = "/share/project/jiahao/geneval/models"
 
 # Store subprocesses
 server_processes = []
 
-def start_server(args, worker_idx, num_gpus_per_worker, port, server_script, unknown_args, log_name):
+def start_server(args, worker_idx, num_gpus_per_worker, port, server_script, unknown_args):
     """Start server on the specified GPU(s)"""
     cmd = [
         sys.executable, server_script,
         "--port", str(port),
-        "--config_path", args.config_path,
+        "--host", HOST,
         *unknown_args,
     ]
+    
+    # Add model-path for GenEval server
+    if "geneval" in server_script:
+        cmd.extend(["--model-path", MODEL_PATH])
+    # Add use-gpu for OCR server
+    elif "ocr" in server_script:
+        cmd.extend(["--use-gpu"])
     
     env = os.environ.copy()
     env['CUDA_VISIBLE_DEVICES'] = ','.join(str(i) for i in range(worker_idx * num_gpus_per_worker, (worker_idx + 1) * num_gpus_per_worker))
     
     # Create log directory
     os.makedirs("./logs", exist_ok=True)
-    log_file = f"./logs/{log_name}_worker_{worker_idx}.log"
+    log_file = f"./logs/{args.log_name}_worker_{worker_idx}.log"
     
     try:
         with open(log_file, 'w') as f:
@@ -74,25 +87,23 @@ def check_server_logs(args, worker_idx):
             print(f"Failed to read log file {log_file}: {e}")
 
 def main():
+    global NUM_GPUS, BASE_PORT
+    
     # Argument parsing
     parser = argparse.ArgumentParser(description='Launch multi-GPU servers')
     parser.add_argument('server_script', help='Server script filename to launch')
-    parser.add_argument('--config_path', type=str, required=True, help='Config path')
-    parser.add_argument('--machine_id', type=int, default=0, help='Machine id')
-    parser.add_argument('--model_name', type=str, required=True, help='Model name')
+    parser.add_argument('--base_port', type=int, default=BASE_PORT, help=f'Base port (default: {BASE_PORT})')
+    parser.add_argument('--log_name', type=str, default=None, help='Log name prefix (default: server)')
+    parser.add_argument('--num_gpus_per_worker', type=int, default=1, help=f'Number of GPUs per worker (default: 1)')
+    
     args, unknown_args = parser.parse_known_args()
-
-    log_name = f"reward_server_{args.model_name}_machine_{args.machine_id}"
-
-    config = yaml.load(open(args.config_path, "r"), Loader=yaml.FullLoader)
-    hosts = config["server"]["hosts"]
-    worker_base_port = config["server"]["worker_base_port"]
-    num_gpus_per_worker = config["reward"]["tensor_parallel_size"]
     
     # Add .py suffix if missing
     server_script = args.server_script
     if not server_script.endswith('.py'):
         server_script += '.py'
+    
+    BASE_PORT = args.base_port
     
     # Check if script exists
     if not os.path.exists(server_script):
@@ -110,31 +121,33 @@ def main():
     else:
         num_available_gpus = 0
     
-    num_workers = num_available_gpus // num_gpus_per_worker
+    num_workers = num_available_gpus // args.num_gpus_per_worker
+    
+    print(f"🔥 Launching {num_workers} {server_script} server(s)")
+    print(f"📍 Base port: {BASE_PORT}")
+    print(f"🖥️  Host: {HOST}")
+    if "geneval" in server_script:
+        print(f"📁 Model path: {MODEL_PATH}")
+    print("-" * 50)
     
     if num_workers == 0:
         print("❌ No available GPUs, exiting")
         sys.exit(1)
-        
-    print(f"🔥 Launching {num_workers} {server_script} server(s)")
-    print(f"📍 Base port: {worker_base_port}")
-    print(f"🖥️  Host: {hosts[args.machine_id]}")
-    print("-" * 50)
     
     # Start all servers
     for worker_idx in range(num_workers):
-        port = worker_base_port + worker_idx
-        process = start_server(args, worker_idx, num_gpus_per_worker, port, server_script, unknown_args, log_name)
+        port = BASE_PORT + worker_idx
+        process = start_server(args, worker_idx, args.num_gpus_per_worker, port, server_script, unknown_args)
         server_processes.append(process)
         time.sleep(3)  # Add delay to avoid resource contention
     
     print(f"\n✅ Attempted to launch {num_workers} server(s)")
     print("Server list:")
     for worker_idx in range(num_workers):
-        port = worker_base_port + worker_idx
-        print(f"  Server {worker_idx}: http://{hosts[args.machine_id]}:{port}")
+        port = BASE_PORT + worker_idx
+        print(f"  GPU {worker_idx}: http://{HOST}:{port}")
     
-    print("\n⏳ Waiting for servers to start...")
+    print(f"\n⏳ Waiting for servers to start...")
     time.sleep(10)  # Wait for servers to start
     
     # Check server status
@@ -142,9 +155,9 @@ def main():
     for i, process in enumerate(server_processes):
         if process and process.poll() is None:
             running_servers += 1
-            print(f"✅ Server {i} is running")
+            print(f"✅ Worker {i} server is running")
         else:
-            print(f"❌ Server {i} failed to start")
+            print(f"❌ Worker {i} server failed to start")
             check_server_logs(args, i)
     
     if running_servers == 0:
@@ -161,7 +174,7 @@ def main():
             # Check for crashed servers
             for i, process in enumerate(server_processes):
                 if process and process.poll() is not None:
-                    print(f"⚠️  Server {i} exited (return code: {process.returncode})")
+                    print(f"⚠️  Server Worker {i} exited (return code: {process.returncode})")
                     check_server_logs(args, i)
                     # Set exited process to None to avoid duplicate reporting
                     server_processes[i] = None

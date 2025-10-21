@@ -26,8 +26,7 @@ class EditScore:
         num_pass: int=1,
         reduction: str="average_last",
         seed: int=42,
-        enable_lora: bool=False,
-        lora_path: str="",
+        lora_path: Optional[str]=None,
         cache_dir: Optional[str]=None,
     ) -> None:
         self.backbone = backbone
@@ -45,7 +44,6 @@ class EditScore:
                 vlm_model=model_name_or_path,
                 temperature=temperature,
                 seed=seed,
-                enable_lora=enable_lora,
                 lora_path=lora_path,
             )
         elif self.backbone == "qwen25vl_vllm":
@@ -58,7 +56,6 @@ class EditScore:
                 max_num_batched_tokens=max_num_batched_tokens,
                 temperature=temperature,
                 seed=seed,
-                enable_lora=enable_lora,
                 lora_path=lora_path,
                 cache_dir=cache_dir,
             )

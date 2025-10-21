@@ -136,9 +136,6 @@ class FlowMatchEulerMaruyamaDiscreteScheduler(SchedulerMixin, ConfigMixin):
 
         return indices[pos].item()
     
-    # def time_shift(self, mu: float, sigma: float, t: torch.Tensor):
-    #     return math.exp(mu) / (math.exp(mu) + (1 / t - 1) ** sigma)
-
     def set_timesteps(
         self,
         num_inference_steps: int = None,
@@ -196,21 +193,7 @@ class FlowMatchEulerMaruyamaDiscreteScheduler(SchedulerMixin, ConfigMixin):
         if t_next is None:
             t_next = t
         def _get_sigma_t(t, t_next):
-            if self.config.sigma_schedule == "v1":
-                return 0.7 * math.sqrt((1 - t) / max(t, 1e-4))
-            elif self.config.sigma_schedule == "v2":
-                if t <= 0.2:
-                    return (1 - t) ** 2
-                else:
-                    return (1 - t) ** 4
-            elif self.config.sigma_schedule == "v3":
-                return 0.7 * ((1 - t) / (t_next)) ** 0.5
-            elif self.config.sigma_schedule == "v4":
-                return torch.tensor(0.3, dtype=torch.float32, device=t.device)
-            elif self.config.sigma_schedule == "zero":
-                return torch.tensor(0, dtype=torch.float32, device=t.device)
-            else:
-                raise ValueError(f"Invalid sigma scheduler: {self.config.sigma_schedule}")
+            return self.config.sigma_coef * ((1 - t) / (t_next)) ** 0.5
         if t.ndim > 0:
             return torch.stack([_get_sigma_t(_t, _t_next) for _t, _t_next in zip(t, t_next)])
         else:
@@ -227,34 +210,6 @@ class FlowMatchEulerMaruyamaDiscreteScheduler(SchedulerMixin, ConfigMixin):
         mixed_precision: bool = False,
         return_dict: bool = True,
     ) -> Union[FlowMatchEulerMaruyamaDiscreteSchedulerOutput, Tuple]:
-        """
-        Predict the sample from the previous timestep by reversing the SDE. This function propagates the diffusion
-        process from the learned model outputs (most often the predicted noise).
-
-        Args:
-            model_output (`torch.FloatTensor`):
-                The direct output from learned diffusion model.
-            timestep (`float`):
-                The current discrete timestep in the diffusion chain.
-            sample (`torch.FloatTensor`):
-                A current instance of a sample created by the diffusion process.
-            s_churn (`float`):
-            s_tmin  (`float`):
-            s_tmax  (`float`):
-            s_noise (`float`, defaults to 1.0):
-                Scaling factor for noise added to the sample.
-            generator (`torch.Generator`, *optional*):
-                A random number generator.
-            return_dict (`bool`):
-                Whether or not to return a [`~schedulers.scheduling_euler_discrete.EulerDiscreteSchedulerOutput`] or
-                tuple.
-
-        Returns:
-            [`~schedulers.scheduling_euler_discrete.EulerDiscreteSchedulerOutput`] or `tuple`:
-                If return_dict is `True`, [`~schedulers.scheduling_euler_discrete.EulerDiscreteSchedulerOutput`] is
-                returned, otherwise a tuple is returned where the first element is the sample tensor.
-        """
-
         if (
             isinstance(timestep, int)
             or isinstance(timestep, torch.IntTensor)

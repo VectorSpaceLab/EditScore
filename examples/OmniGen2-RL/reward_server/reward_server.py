@@ -1,6 +1,8 @@
-#!/usr/bin/env python3
+import dotenv
 
-from typing import List
+dotenv.load_dotenv(override=True)
+
+from typing import List, Optional
 import argparse
 import pickle
 import json
@@ -16,6 +18,7 @@ from flask import Flask, request, jsonify
 from PIL import Image
 
 from editscore import EditScore
+import yaml
 
 warnings.filterwarnings("ignore")
 
@@ -36,24 +39,20 @@ def apply_chat_template(prompt, num_images: int = 2):
 
 class VLMScorer:
     """Encapsulates vLLM model and scoring logic."""
-    def __init__(self, args: argparse.Namespace):
+    def __init__(self, config: Dict[str, any]):
         print("🔧 Initializing VLMScorer...")
         self.scorer = EditScore(
-            backbone=args.backbone,
-            key=args.key,
-            openai_url=args.openai_url,
-            model_name_or_path=args.model_name_or_path,
-            score_range=args.score_range,
-            temperature=args.temperature,
-            tensor_parallel_size=args.tensor_parallel_size,
-            max_model_len=args.max_model_len,
-            max_num_seqs=args.max_num_seqs,
-            max_num_batched_tokens=args.max_num_batched_tokens,
-            num_pass=args.num_pass,
-            enable_lora=args.enable_lora,
-            lora_path=args.lora_path,
-            cache_dir=args.cache_dir,
-            seed=args.seed,
+            backbone=config["backbone"],
+            model_name_or_path=config["model_name_or_path"],
+            score_range=config["score_range"],
+            temperature=config["temperature"],
+            tensor_parallel_size=config["tensor_parallel_size"],
+            max_model_len=config["max_model_len"],
+            max_num_seqs=config["max_num_seqs"],
+            max_num_batched_tokens=config["max_num_batched_tokens"],
+            num_pass=config["num_pass"],
+            lora_path=config["lora_path"],
+            seed=config["seed"],
         )
         print("✅ VLMScorer initialization complete.")
 
@@ -178,42 +177,19 @@ def evaluate_batch_samples():
 
 def arg_parser():
     parser = argparse.ArgumentParser(description='VLM Reward Server - High concurrency optimized (Flask native server)')
-    parser.add_argument('--port', type=int, default=18096, help='Server port')
     parser.add_argument('--host', type=str, default='0.0.0.0', help='Server host (0.0.0.0 means listen on all interfaces)')
-    parser.add_argument('--gpu-id', type=int, default=0, help='GPU device ID to use')
-    parser.add_argument('--seed', type=int, default=42, help='Seed')
-    parser.add_argument(
-        "--backbone",
-        type=str,
-        default="qwen25vl_vllm",
-        choices=["openai", "qwen25vl", "qwen25vl_vllm", "internvl3_5"],
-    )
-    parser.add_argument("--model_name_or_path", type=str, default="gpt-4.1")
-    parser.add_argument(
-        "--openai_url", type=str, default="https://api.openai.com/v1/chat/completions"
-    )
-    parser.add_argument("--key", type=str, default="PUT YOUR API KEY HERE")
-    parser.add_argument("--num_pass", type=int, default=1)
-    parser.add_argument("--temperature", type=float, default=0.7)
-    parser.add_argument("--max_workers", type=int, default=20)
-    parser.add_argument("--score_range", type=int, default=25)
-    parser.add_argument("--tensor_parallel_size", type=int, default=1)
-    parser.add_argument("--max_model_len", type=int, default=1536)
-    parser.add_argument("--max_num_seqs", type=int, default=32)
-    parser.add_argument("--max_num_batched_tokens", type=int, default=1536)
-    parser.add_argument("--enable_lora", action="store_true")
-    parser.add_argument("--lora_path", type=str, default="")
-    parser.add_argument("--cache_dir", type=str, default=None)
+    parser.add_argument('--port', type=int, default=18096, help='Server port')
+    parser.add_argument('--config_path', type=str, default='examples/OmniGen2-RL/reward_server/server_configs/editscore_7B.yml', help='Configuration file path')
     args = parser.parse_args()
     return args
 
 def main(args):
     """Main function, loads model, starts background worker thread and web server."""
-    # setup_gpu_env(args.gpu_id)
 
     # 1. Load model
     print("⚡ Preloading VLM model...")
-    scorer = VLMScorer(args)
+    config = yaml.load(open(args.config_path, "r"), Loader=yaml.FullLoader)
+    scorer = VLMScorer(config["reward"])
     
     # 2. Start background worker thread
     worker_thread = threading.Thread(target=vlm_worker, args=(scorer,), daemon=True)
@@ -222,7 +198,6 @@ def main(args):
     # 3. Start Flask web server
     print(f"🔥 Starting VLM reward server at http://{args.host}:{args.port}")
     print("🚀 Mode: High concurrency single-sample requests (queue-based processing)")
-    print(f"{args.score_range=} {args.tensor_parallel_size=}")
     
     # Use Flask's built-in development server with threading enabled
     try:

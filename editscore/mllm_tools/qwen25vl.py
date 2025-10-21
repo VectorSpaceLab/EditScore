@@ -36,16 +36,12 @@ class Qwen25VL():
         vlm_model,
         temperature: float = 0.7,
         seed: Optional[int] = None,
-        enable_lora: bool = False,
-        lora_path: str = "",
+        lora_path: Optional[str] = None,
     ) -> None:
-        self.enable_lora = enable_lora
-        self.lora_path = lora_path
-
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             vlm_model, torch_dtype=torch.bfloat16, device_map="auto"
         )
-        if enable_lora:
+        if lora_path:
             self.model = PeftModel.from_pretrained(self.model, lora_path)
             self.model = self.model.merge_and_unload()
 

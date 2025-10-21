@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from typing import List, Dict, Any, Tuple
 import argparse
 import pickle
 import requests
@@ -10,7 +11,7 @@ from flask import Flask, request, jsonify
 from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
 import math
-from typing import List, Dict, Any, Tuple
+import yaml
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -103,7 +104,7 @@ class RewardProxy:
         print(f"{len(self.server_urls)=}, {worker_configs=}", flush=True)
         self.executor = ThreadPoolExecutor(max_workers=len(self.server_urls))
 
-        logger.info(f"🚀 Proxy initialized")
+        logger.info("🚀 Proxy initialized")
         logger.info(f"  -> servers {self.server_urls=} ...")
 
     @staticmethod
@@ -259,46 +260,47 @@ def evaluate():
 def main():
     parser = argparse.ArgumentParser(description="Universal Reward Proxy Server")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Server host address")
-    parser.add_argument("--port", type=int, default=23456, help="Proxy server port")
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        default="server_configs/editscore_7B.yml",
+        help="Configuration file path",
+    )
+    # parser.add_argument("--port", type=int, default=23456, help="Proxy server port")
 
-    parser.add_argument("--worker_host", type=str, default="127.0.0.1")
-    parser.add_argument("--worker_base_port", type=int, default=18888)
-    parser.add_argument("--worker_num_machines", type=int, default=1)
-    parser.add_argument("--max_workers_per_machine", type=int, default=128)
-    parser.add_argument("--batch_size", type=int, default=64)
+    # parser.add_argument("--worker_host", type=str, default="127.0.0.1")
+    # parser.add_argument("--worker_base_port", type=int, default=18888)
+    # parser.add_argument("--worker_num_machines", type=int, default=1)
+    # parser.add_argument("--max_workers_per_machine", type=int, default=128)
+    # parser.add_argument("--batch_size", type=int, default=64)
     args = parser.parse_args()
 
-    print(
-        f"{args.worker_host=}, {args.worker_base_port=}, {args.worker_num_machines=}, {args.max_workers_per_machine=}, {args.batch_size=}",
-        flush=True,
-    )
-    # Create and configure proxy instance
-    worker_configs = [
-        {
-            "host": f"{args.worker_host}-master-0",
-            "base_port": args.worker_base_port,
-            "num_servers": args.max_workers_per_machine,
-        }
-    ]
-    for i in range(args.worker_num_machines - 1):
+    # print(
+    #     f"{args.worker_host=}, {args.worker_base_port=}, {args.worker_num_machines=}, {args.max_workers_per_machine=}, {args.batch_size=}",
+    #     flush=True,
+    # )
+    config = yaml.load(open(args.config_path, "r"), Loader=yaml.FullLoader)
+    proxy_port = config["server"]["proxy_port"]
+
+    worker_configs = []
+
+    hosts = config["server"]["hosts"]
+    for i, host in enumerate(hosts):
         worker_configs.append(
             {
-                "host": f"{args.worker_host}-worker-{i}",
-                "base_port": args.worker_base_port,
-                "num_servers": args.max_workers_per_machine,
+                "host": host,
+                "base_port": config["server"]["worker_base_port"],
+                "num_servers": 8 // config["reward"]["tensor_parallel_size"],
             }
         )
-        
+
     proxy_instance = RewardProxy(worker_configs)
     app.proxy = proxy_instance
 
     logger.info(f"Starting proxy server at {worker_configs=}")
 
-    # Use production-grade waitress server instead of Flask's dev server
-    # from waitress import serve
-    # serve(app, host=args.host, port=args.port, threads=100)
     app.run(
-        host=args.host, port=args.port, debug=False, threaded=True, use_reloader=False
+        host=args.host, port=proxy_port, debug=False, threaded=True, use_reloader=False
     )
 
 

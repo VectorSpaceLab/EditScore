@@ -1,15 +1,14 @@
 # !/bin/bash
-job_id=job-09ff3d74-0547-4085-a7fb-92ecd6e9b1e0
-num_machines=2
+SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
+
+root_dir=$SHELL_FOLDER
+
+config_path=${root_dir}/server_configs/editscore_7B.yml
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --job_id=*)
-            job_id="${1#*=}"
-            shift
-            ;;
-        --num_machines=*)
-            num_machines="${1#*=}"
+        --config_path=*)
+            config_path="${1#*=}"
             shift
             ;;
         *)
@@ -19,23 +18,14 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-machines=(
-$job_id-master-0
-)
-
-echo $num_machines
-
-for i in $(seq 0 $((num_machines - 2))); do
-    machines+=("$job_id-worker-$i")
-done
-
-echo "machines: ${machines[@]}"
+hosts_string=$(python ${root_dir}/scripts/misc/load_host.py --config_path=${config_path})
+hosts=(${hosts_string})
 
 SCRIPT="pkill python"
 
-for i in "${!machines[@]}"; do
-    echo "$i ${machines[$i]}"
-    ssh -o StrictHostKeyChecking=no "${machines[$i]}" "$SCRIPT" &
+for i in "${!hosts[@]}"; do
+    echo "$i ${hosts[$i]}"
+    ssh -o StrictHostKeyChecking=no "${hosts[$i]}" "$SCRIPT" &
 done
 
 wait
