@@ -76,7 +76,7 @@ We are actively working on improving EditScore and expanding its capabilities. H
 
 
 - [x] Release training data for reward model and online RL.
-- [ ] Release RL training code applying EditScore to OmniGen2.
+- [x] Release RL training code applying EditScore to OmniGen2.
 - [x] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
 
 ## 🚀 Quick Start
