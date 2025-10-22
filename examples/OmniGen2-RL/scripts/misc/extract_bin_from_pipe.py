@@ -3,8 +3,11 @@ import dotenv
 dotenv.load_dotenv(override=True)
 
 import os
+import sys
 
 import torch
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from omnigen2.models.transformers.transformer_omnigen2 import OmniGen2Transformer2DModel
 

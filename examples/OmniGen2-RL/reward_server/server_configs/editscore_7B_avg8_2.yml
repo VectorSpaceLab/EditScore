@@ -1,0 +1,30 @@
+server:
+  hosts: 
+    # - 127.0.0.1
+    # - 127.0.0.2
+    # - 127.0.0.3
+    # - 127.0.0.4
+    # - 127.0.0.5
+    # - 127.0.0.6
+    # - 127.0.0.7
+    # - 127.0.0.8
+    - job-9eff4782-d7d0-4a11-89bd-3bd2a3ad5175-master-0
+    - job-9eff4782-d7d0-4a11-89bd-3bd2a3ad5175-worker-0
+    - job-9eff4782-d7d0-4a11-89bd-3bd2a3ad5175-worker-1
+    - job-9eff4782-d7d0-4a11-89bd-3bd2a3ad5175-worker-2
+    
+  worker_base_port: 18888
+  proxy_port: 23456
+
+reward:
+  backbone: qwen25vl_vllm
+  model_name_or_path: /share/project/shared_models/Qwen2.5-VL-7B-Instruct
+  lora_path: EditScore/EditScore-7B
+  score_range: 25
+  tensor_parallel_size: 1
+  max_num_seqs: 64
+  max_model_len: 1536
+  max_num_batched_tokens: 98304
+  num_pass: 8
+  seed: 42
+  temperature: 0.7

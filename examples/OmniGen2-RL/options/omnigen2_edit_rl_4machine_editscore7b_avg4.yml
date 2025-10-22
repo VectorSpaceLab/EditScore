@@ -1,8 +1,10 @@
-name: omnigen2_edit_rl
+name: omnigen2_edit_rl_4machine_editscore7b_avg4
 
 seed: 2233
 device_specific_seed: true
 workder_specific_seed: true
+
+reward_server_config: reward_server/server_configs/editscore_7B_avg4.yml
 
 data:
   data_path: data_configs/train/example/train.yml
@@ -40,14 +42,11 @@ transport:
   dynamic_time_shift: true
 
 train:
-
-  # global_batch_size: 576
-  global_batch_size: 144
+  global_batch_size: 576
   batch_size: 18
   gradient_accumulation_steps: 1
-  
-  # num_train_epochs: 4
-  max_train_steps: 5000
+
+  max_train_steps: 1000
   
   dataloader_num_workers: 12
 
@@ -85,8 +84,7 @@ train:
   lora_dropout: 0
 
   rl:
-    # num_unique_prompts_per_sampling: 48
-    num_unique_prompts_per_sampling: 12
+    num_unique_prompts_per_sampling: 48
     num_update_steps_per_sampling: 2
     batch_size_per_forward: 9
     num_images_per_prompt: 12
@@ -107,11 +105,11 @@ train:
     server_type: vlm
     use_ori_neg_prompt_template: true
     time_shift_base_res: 168
+    policy_loss_reweighting: false
 
 val:
   train_visualization_interval: 5
   num_train_visualization_samples: 3
-
 
 logger:
   log_with: [wandb, tensorboard]

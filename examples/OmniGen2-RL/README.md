@@ -79,7 +79,11 @@ Downlaod the official RL training data from [EditScore-RL-Data](https://huggingf
 2. Create Meta File
 The uploaded dataset uses relative image paths. Run the following script to convert them to absolute paths based on your local environment:
 ```bash
+# Then
 python scripts/data/process_jsonl.py --input /path/to/EditScore-RL-Data/rl.jsonl --output /path/to/EditScore-RL-Data/rl_abs.jsonl --base-path /path/to/EditScore-RL-Data
+
+# Due to the limitation of base model (OmniGen2), we discard text change and portrait beautification, as these tasks harm RL training.
+python scripts/data/extract_9_tasks.py --input_path /path/to/EditScore-RL-Data/rl_abs.jsonl --output_path /path/to/EditScore-RL-Data/rl_abs_9tasks.jsonl
 ```
 3. Configure the Data Path
 Specify the path to your processed `.jsonl` file in the data configuration located at `data_configs/train/example/edit/all.yml`.
@@ -89,7 +93,7 @@ ratio_type: inside_ratio
 
 data:
   - 
-    path: '/path/to/EditScore-RL-Data/rl_abs.jsonl' # <-- Ensure this path is correct
+    path: '/path/to/EditScore-RL-Data/rl_abs_9tasks.jsonl' # <-- Ensure this path is correct
     type: 'edit'
     ratio: !!float 1
 ```
@@ -130,29 +134,53 @@ python reward_server/scripts/utils/reward_server_sanity_check.py --config_path=r
 ```
 Once these steps are complete, your environment is ready to begin the reinforcement learning fine-tuning process.
 
-### 4. Start Training
+### 4. Start RL Fine-Tuning
 
 **Configure Training Parameters**
+Before launching, you may need to adjust key parameters in the configuration file: `options/omnigen2_edit_rl_4machine_editscore7b_avg4.yml`.
 
-Edit the `options/omnigen2_edit_rl.yml` configuration file, focusing on these key parameters:
-- `train.global_batch_size`: Global batch size across all GPUs (num_unique_prompts_per_sampling * num_images_per_prompt)
-- `train.batch_size`: Batch size per GPU (batch_size_per_forward * gradient_accumulation_steps * num_update_steps_per_sampling)
-- `train.rl.num_images_per_prompt`: The number of roolout of one prompt 
-- `train.rl.num_unique_prompts_per_sampling`: Number of global unique prompts
+Here are some important settings:
+- `train.global_batch_size`: The total number of images generated across all GPUs in a single sampling phase before the policy is updated. It is calculated as `num_unique_prompts_per_sampling * num_images_per_prompt`.
+- `train.batch_size`: Batch size per GPU (`batch_size_per_forward * gradient_accumulation_steps * num_update_steps_per_sampling`)
+- `train.rl.num_images_per_prompt`: The number of candidate images to generate for each unique prompt.
+- `train.rl.num_unique_prompts_per_sampling`: The number of unique prompts in a global batch
+- `train.rl.num_update_steps_per_sampling`: The number of gradient updates to perform in each sampling phase. Set this to `> 1` to enable off-policy RL, which improves sample efficiency.
+- `train.rl.batch_size_per_forward`: Batch size for each forward pass. Together with `num_update_steps_per_sampling`, it defines the total number of samples processed per policy update.
 
 **Launch Distributed Training**
+We provide scripts for both single and multi-machine distributed training based on **FSDP**.
 ```bash
-# Single machine training (8*H100 GPUs)
-bash scripts/train/omnigen2_edit_rl.sh
+# Single-machine training (8 GPUs) using EditScore-7B as the reward model
+bash scripts/train/omnigen2_edit_rl_single_machine_editscore7b.sh
 
-# Multi-machine distributed training
+# Multi-machine training (e.g., 4 machines with 8 GPUs each) using EditScore-7B (Avg@4)
+bash scripts/train/omnigen2_edit_rl_4machine_editscore7b_avg4.sh
 ```
 
-> **⚠️ Training Configuration Key Points**
->
-> **Reward Server IP**: Ensure the `REWARD_SERVER_IP` environment variable in training scripts points to the correct reward server address
-
-
 ### 4. Training Outputs and Monitoring
+All training artifacts, including logs and model checkpoints, are saved to the `experiments/` directory.
 
-Logs and saved model checkpoints in `experiments/`
+### 5. Evaluate your RL Fine-Tuned Model
+After training, you must convert the FSDP-saved checkpoint (`.bin`) into the standard Hugging Face format before you can use it for inference.
+
+#### Step 1: Convert the Checkpoint
+We provide a script to automatically handle the conversion from the distributed FSDP format to the standard Hugging Face format (`.bin`).
+Run the following command, replacing the arguments with your experiment's details:
+
+```shell
+bash scripts/misc/convert_dist_ckpt_to_hf_format.sh [EXPERIMENT_NAME] [STEP_NUMBER]
+```
+- [EXPERIMENT_NAME]: The name of your training experiment (e.g., omnigen2_edit_rl_single_machine_editscore7b).
+- [STEP_NUMBER]: The specific training step of the checkpoint you wish to evaluate (e.g., 500).
+
+This will create a new directory containing the converted model weights in the standard format, ready for inference.
+
+#### Step 2: Run Evaluation on GEdit-Bench
+Once the checkpoint is converted, you can benchmark its performance. We provide evaluation scripts tailored for GEdit-Bench.
+
+You can use our example scripts as a template. Simply copy one and modify the internal paths to point to your newly converted model checkpoint.
+```shell
+# Run evaluation for the converted model from step 500
+bash evaluation/GEdit-Bench/omnigen2_edit_rl_single_machine_editscore7b_step500.sh
+```
+By comparing the results to the baseline model's performance, you can quantify the improvements achieved through RL fine-tuning with EditScore.

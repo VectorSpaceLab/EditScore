@@ -16,7 +16,7 @@ server:
 
 reward:
   backbone: qwen25vl_vllm
-  model_name_or_path: Qwen/Qwen2.5-VL-7B-Instruct
+  model_name_or_path: /share/project/shared_models/Qwen2.5-VL-7B-Instruct
   lora_path: EditScore/EditScore-7B
   score_range: 25
   tensor_parallel_size: 1

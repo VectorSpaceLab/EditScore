@@ -53,12 +53,13 @@ from peft import LoraConfig
 
 from omnigen2.training_utils import EMAModel
 from omnigen2.utils.logging_utils import TqdmToLogger
+from omnigen2.utils.tensor_util import pad_to_length, expand_as
 from omnigen2.dataset.omnigen2_train_dataset import OmniGen2TrainDataset, OmniGen2Collator, RepeatedDistributedBatchSampler
 from omnigen2.models.transformers.transformer_omnigen2 import OmniGen2Transformer2DModel
 from omnigen2.models.transformers.repo import OmniGen2RotaryPosEmbed
-from omnigen2.grpo.utils import forward_logprob, process_grpo_rewards, compute_single_step_ppo_loss
-from omnigen2.utils.tensor_util import pad_to_length, expand_as
 from omnigen2.grpo.reward_client_edit import evaluate_images
+from omnigen2.grpo.utils import forward_logprob, process_grpo_rewards, compute_single_step_ppo_loss
+from omnigen2.pipelines.omnigen2.pipeline_omnigen2 import FMPipelineOutput
 
 
 logger = get_logger(__name__)
@@ -276,9 +277,7 @@ def main(args):
     else:
         model = OmniGen2Transformer2DModel(**args.model.arch_opt)
     model.train()
-    # model = OmniGen2Transformer2DModel(**args.model.arch_opt)
-    # model.train()
-
+    
     freqs_cis = OmniGen2RotaryPosEmbed.get_freqs_cis(
         model.config.axes_dim_rope,
         model.config.axes_lens,
@@ -327,7 +326,6 @@ def main(args):
 
         target_modules = ["to_k", "to_q", "to_v", "to_out.0"]
 
-        # now we will add new LoRA weights the transformer layers
         lora_config = LoraConfig(
             r=args.train.lora_rank,
             lora_alpha=args.train.lora_alpha,
@@ -470,8 +468,6 @@ def main(args):
 
     logger.info("***** Prepare everything with our accelerator *****")
 
-    # p0 = [p for p in model.parameters()]
-
     if args.train.ema_decay != 0:
         model, model_ema, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
             model, model_ema, optimizer, train_dataloader, lr_scheduler
@@ -555,7 +551,6 @@ def main(args):
         transformer=model,
         vae=vae,
         scheduler=FlowMatchEulerMaruyamaDiscreteScheduler(
-            sigma_schedule=args.train.rl.sigma_schedule,
             sigma_coef=args.train.rl.get('sigma_coef', 0.7),
             time_shift_base_res=args.train.rl.get('time_shift_base_res', 320)
         ),
@@ -599,7 +594,8 @@ def main(args):
 
         ref_latents_N, ref_img_mask_N, l_effective_ref_img_len_N, ref_img_sizes_N = pipeline.transformer.flat_and_pad_to_seq_ref_img(None, args.train.rl.batch_size_per_forward, weight_dtype, accelerator.device)
 
-
+    reward_server_config = OmegaConf.load(args.reward_server_config)
+    
     for epoch in range(first_epoch, args.train.num_train_epochs):
         if 'max_train_steps' in args.train and global_step >= args.train.max_train_steps:
             break
@@ -609,11 +605,8 @@ def main(args):
             input_images = batch['input_images']
             input_images_pil = batch['input_images_pil']
             target_img_size = batch['target_img_size']
-            # output_image = batch['output_image']
             text_mask = batch['text_mask']
             text_input_ids = batch['text_ids']
-
-            from omnigen2.pipelines.omnigen2.pipeline_omnigen2 import FMPipelineOutput
 
             total_results = None
             total_text_feats = None
@@ -665,7 +658,6 @@ def main(args):
                             total_results.log_probs[i] = torch.cat([total_results.log_probs[i], results.log_probs[i]], dim=0)
 
             for i in range(len(batch['meta_data'])):
-                # batch['meta_data'][i] += f"id: {accelerator.process_index * len(total_results.images) + i}"
                 json_data = json.loads(batch['meta_data'][i])
                 json_data['id'] = f"{global_step * args.train.global_batch_size + accelerator.process_index * args.train.batch_size + i}"
                 batch['meta_data'][i] = json.dumps(json_data)
@@ -676,17 +668,14 @@ def main(args):
             gathered_meta_data = gather_object(batch['meta_data'])
 
             if accelerator.is_main_process:
-                start_time = time.time()
                 scores, rewards, reasoning, meta_data = evaluate_images(
                     input_images=gathered_input_images_pil,
                     output_image=gathered_output_images,
                     meta_datas=gathered_meta_data,
-                    proxy_host=os.environ['REWARD_SERVER_IP'],
-                    proxy_port=23456,
+                    proxy_host=reward_server_config.server.hosts[0],
+                    proxy_port=reward_server_config.server.proxy_port,
                     server_type=args.train.rl.get('server_type', 'vlm')
                 )
-                end_time = time.time()
-                # print(f"evaluate_images time: {end_time - start_time}", flush=True)
 
                 rewards_to_scatter = [rewards[i:i + local_batch_size] for i in range(0, len(rewards), local_batch_size)]
                 reasoning_to_scatter = [reasoning[i:i + local_batch_size] for i in range(0, len(reasoning), local_batch_size)]
@@ -697,8 +686,7 @@ def main(args):
                 meta_data_to_scatter = [None for _ in range(accelerator.num_processes)]
 
             accelerator.wait_for_everyone()
-            # 取出当前进程自己的 rewards, reasoning, meta_data
-            start_time = time.time()
+            # Extract the current process’s own rewards, reasoning, and meta_data.
             rewards = [None]
             reasoning = [None]
             meta_data = [None]
@@ -707,27 +695,18 @@ def main(args):
             torch.distributed.scatter_object_list(meta_data, meta_data_to_scatter)
             rewards = rewards[0]
             reasoning = reasoning[0]
-            meta_data = meta_data[0] 
-          
-            end_time = time.time()
-            # print(f"scatter_object_list time: {end_time - start_time}", flush=True)
+            meta_data = meta_data[0]
 
             assert len(rewards) == len(reasoning) == len(meta_data) == local_batch_size
 
             rewards = torch.tensor(rewards, dtype=torch.float32, device=accelerator.device)
-            start_time = time.time()
-            
-
+        
             advantages, prompt_stats = process_grpo_rewards(
                 rewards=rewards,
                 prompts=instruction,
                 accelerator=accelerator,
                 std_level=args.train.rl.get('std_level', 'group'),
             )
-
-
-            end_time = time.time()
-            # print(f"process_grpo_rewards time: {end_time - start_time}", flush=True)
 
             reuse_samples_nums = args.train.rl.reuse_samples_nums  # reuse times of samples 
             clip_range = args.train.rl.clip_range              # PPO clip range
@@ -757,8 +736,6 @@ def main(args):
                     for k in ['images', 'l_effective_img_len', 'img_sizes', 'l_effective_ref_img_len', 'ref_img_sizes']:
                         results.__dict__[k] = total_results.__dict__[k][forward_step*batch_size_per_forward:(forward_step+1)*batch_size_per_forward]
                     
-                    # results.middle_latents = [total_results.middle_latents[i][forward_step*batch_size_per_forward:(forward_step+1)*batch_size_per_forward] for i in range(len(total_results.middle_latents))]
-                    # results.middle_latents = total_results.middle_latents[forward_step]
                     for k in ['img_mask', 'ref_latents', 'ref_img_mask', 'middle_latents']:
                         results.__dict__[k] = total_results.__dict__[k][forward_step]
 
@@ -771,13 +748,8 @@ def main(args):
                     train_timesteps = list(range(args.train.rl.num_inference_step))
                     sample_steps = math.ceil(args.train.rl.num_inference_step * args.train.rl.get('train_timesteps_fraction', 1.0))
                     train_timesteps = sorted(random.sample(train_timesteps, k=sample_steps))
-
-                    # mask_per_forward_step = mask[
-                    #     forward_step * batch_size_per_forward : (forward_step + 1)
-                    #     * batch_size_per_forward
-                    # ]
                     
-                    if args.train.rl.get('policy_loss_reweighting', 'none') == 'v1':
+                    if args.train.rl.policy_loss_reweighting:
                         sigma_ts = []
                         for i in train_timesteps:
                             t = timesteps[0, i]
@@ -786,30 +758,6 @@ def main(args):
                             sigma_t = pipeline.scheduler.get_sigma_t(t, t_next if i == 0 else None)  # [batch_size]
                             dt = t_next - t
                             sigma_ts.append(sigma_t * math.sqrt(dt))
-                        
-                        sigma_ts = torch.stack(sigma_ts)
-                        normalize_factor = sigma_ts.mean()
-                    elif args.train.rl.get('policy_loss_reweighting', 'none') == 'v2':
-                        sigma_ts = []
-                        for i in train_timesteps:
-                            t = timesteps[0, i]
-                            t_next = timesteps[0, i+1]
-
-                            sigma_t = pipeline.scheduler.get_sigma_t(t, t_next if i == 0 else None)  # [batch_size]
-                            dt = t_next - t
-                            sigma_ts.append(sigma_t)
-                        
-                        sigma_ts = torch.stack(sigma_ts)
-                        normalize_factor = sigma_ts.mean()
-                    elif args.train.rl.get('policy_loss_reweighting', 'none') == 'v3':
-                        sigma_ts = []
-                        for i in train_timesteps:
-                            t = timesteps[0, i]
-                            t_next = timesteps[0, i+1]
-
-                            sigma_t = pipeline.scheduler.get_sigma_t(t, t_next if i == 0 else None)  # [batch_size]
-                            dt = t_next - t
-                            sigma_ts.append(sigma_t / math.sqrt(dt))
                         
                         sigma_ts = torch.stack(sigma_ts)
                         normalize_factor = sigma_ts.mean()
@@ -907,7 +855,6 @@ def main(args):
                             
                             loss = 0
                           
-                            # print(f"{global_step=} {forward_step=} {i=} {torch.exp( step_log_probs - old_log_probs[i])=}", flush=True)
                             (
                                 policy_loss,
                                 policy_clip_frac,
@@ -950,14 +897,13 @@ def main(args):
                             logs['ratio_large_than_1'].append(ratio_large_than_1.detach())
                             logs['ratio_small_than_1'].append(ratio_small_than_1.detach())
 
-                            if args.train.rl.get('policy_loss_reweighting', 'none') != 'none':
+                            if args.train.rl.policy_loss_reweighting:
                                 policy_loss = policy_loss * sample_steps * (sigma_ts[idx] / normalize_factor)
 
                             loss += policy_loss
 
                             if args.train.rl.kl_loss_weight > 0:
-                                # assert mean_t.shape == mean_t_ref.shape, f"{mean_t.shape=} {mean_t_ref.shape=}"
-                              
+                                
                                 kl_loss = torch.mean(
                                     ((mean_t - mean_t_ref.detach()) ** 2)
                                     .flatten(start_dim=1)
@@ -971,7 +917,6 @@ def main(args):
                             logs['loss'].append(loss.detach())
                             accelerator.backward(loss)
                             if accelerator.sync_gradients:
-                                # grad_norm = accelerator.clip_grad_norm_(trainable_params, args.train.max_grad_norm)
                                 grad_norm = accelerator.clip_grad_norm_(model.parameters(), args.train.max_grad_norm)
                                 logs['grad_norm'].append(grad_norm.to(accelerator.device).detach())
                             optimizer.step()
@@ -1008,7 +953,6 @@ def main(args):
                                         v["std"] == 0 for k, v in prompt_stats.items()
                                     ]
                                 )
-                            
                             }
                         )
 
@@ -1042,7 +986,6 @@ def main(args):
                             accelerator.save_state(save_path)
                             logger.info(f"Saved state to {save_path}")
                             
-                        # if accelerator.is_main_process:
                         if 'train_visualization_interval' in args.val and (global_step - 1) % args.val.train_visualization_interval == 0:
                             num_samples = min(args.val.get('num_train_visualization_samples', 2), args.train.batch_size)
 

@@ -3,13 +3,14 @@ SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 cd $(dirname $SHELL_FOLDER)
 cd ../
 
+source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
+conda activate py3.12+pytorch2.7.1+cu126
 
 debug=false
 RANK=0
 MASTER_ADDR=1
 MASTER_PORT=29500
 WORLD_SIZE=1
-
 
 # process named arguments
 while [[ $# -gt 0 ]]; do
@@ -49,10 +50,7 @@ num_processes=$(($WORLD_SIZE * $num_gpu_cards))
 echo "num_processes: $num_processes"
 echo $NCCL_DEBUG_FILE
 
-experiment_name="omnigen2_edit_rl"
-reward_server_ip="your_reward_server_ip"
-# reward_server_ip="job-6f07e1f8-44b1-4218-8c10-d09664e02666-master-0"
-export REWARD_SERVER_IP=$reward_server_ip
+experiment_name="omnigen2_edit_rl_4machine_editscore7b_avg8_sigma_0dot9_reweight"
 
 accelerate launch \
 --machine_rank=$RANK \
