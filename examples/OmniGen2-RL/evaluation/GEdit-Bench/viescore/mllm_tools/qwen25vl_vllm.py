@@ -93,7 +93,7 @@ class Qwen25VL():
 
 if __name__ == "__main__":
     model = Qwen25VL(
-        vlm_model="/share/project/luoxin/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct/snapshots/cc594898137f460bfe9f0759e9844b3ce807cfb5",
+        vlm_model="Qwen/Qwen2.5-VL-7B-Instruct",
         max_model_len=16384,
         tensor_parallel_size=1,
         max_num_seqs=32

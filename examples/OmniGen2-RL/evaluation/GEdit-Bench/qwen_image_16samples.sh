@@ -71,7 +71,7 @@ for ((i=0; i<num_gpus_per_machine; i++)); do
 
     CUDA_VISIBLE_DEVICES=${i} WORLD_SIZE=1 nohup accelerate launch --num_processes 1 --num_machines 1 \
     evaluation/GEdit-Bench/inference_qwen_image.py \
-    --pipeline_path /share/project/luoxin/modelscope/models/Qwen/Qwen-Image-Edit \
+    --pipeline_path Qwen/Qwen-Image-Edit \
     --num_inference_step 50 \
     --height 1024 \
     --width 1024 \

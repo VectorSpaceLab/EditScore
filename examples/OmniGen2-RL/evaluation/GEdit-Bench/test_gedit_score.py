@@ -95,7 +95,7 @@ if __name__ == "__main__":
         backbone=backbone, task="tie", key=args.key, openai_url=args.openai_url
     )
     max_workers = 20
-    dataset = load_from_disk("/share/project/chenyuan/data/GEdit-Bench")
+    dataset = load_dataset("stepfun-ai/GEdit-Bench", split='train')
     dataset = dataset.remove_columns(["input_image", "input_image_raw"])
     dataset = dataset.filter(lambda x: x["instruction_language"] == "en", num_proc=4)
 

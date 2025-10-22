@@ -74,12 +74,16 @@ for ((i=0; i<num_gpus_per_machine; i++)); do
     --result_dir evaluation/GEdit-Bench/results/OmniGen2/results_ts${text_guidance_scale}_ig${image_guidance_scale} \
     --save_dir evaluation/GEdit-Bench/results/OmniGen2/results_ts${text_guidance_scale}_ig${image_guidance_scale}_pass4 \
     --num_samples 16 \
-    --backbone qwen25vl \
-    --model_variant GRM-v4 \
-    --model_path /share/project/jiahao/LLaMA-Factory2/output/merge_v7-2_8models_omnigen2-4samples_gpt4-1_range_0to25 \
+    --backbone qwen25vl_vllm \
+    --model_name_or_path Qwen/Qwen2.5-VL-7B-Instruct \
+    --enable_lora \
+    --lora_path EditScore/EditScore-7B \
+    --score_range 25 \
     --max_workers 1 \
     --max_model_len 4096 \
-    --context_version v2 \
+    --max_num_seqs 1 \
+    --max_num_batched_tokens 4096 \
+    --tensor_parallel_size 1 \
     --num_pass 4 \
     --start_index ${start_idx} --end_index ${end_idx} \
     > logs/gedit_OmniGen2_ts${text_guidance_scale}_ig${image_guidance_scale}_16samples_select_best_pass4_${start_idx}_${end_idx}.log 2>&1 &

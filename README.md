@@ -28,9 +28,17 @@
 - **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
-- **2025-10-16**: Training datasets [EditScore-Reward-Data](https://huggingface.co/datasets/EditScore/EditScore-Reward-Data) and [EditScore-RL-Data](https://huggingface.co/datasets/EditScore/EditScore-RL-Data) are available.
-- **2025-10-15**: **EditScore** is now available on PyPI — install it easily with `pip install editscore`.
-- **2025-10-15**: Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit are now available! See [this](#apply-editscore-to-image-editing) for details.
+- **2025-10-22**: **Introducing Our Reinforcement Learning Training Framework!**
+  We're excited to release our complete RL pipeline, the result of a massive effort to simplify fine-tuning for image editing models. Key features include:
+    - **Ready-to-Use RL Dataset**: Includes the complete dataset used in the EditScore project, along with clear usage guidelines and preparation scripts.
+    - **An Easy-to-Use Reward Model**: Seamlessly integrate **EditScore** as a reward signal.
+    - **A Scalable Reward Server**: Built with native multi-node support for high-throughput training.
+    - **Flexible Training Code**: Supports distributed training, variable image resolutions and mixed tasks (t2i, edit, in-context generation) out-of-the-box.
+  Dive into our comprehensive guide on [RL Fine-Tuning](examples/OmniGen2-RL#application-2-reinforcement-fine-tuning) to get started.
+
+- 2025-10-16: Training datasets [EditScore-Reward-Data](https://huggingface.co/datasets/EditScore/EditScore-Reward-Data) and [EditScore-RL-Data](https://huggingface.co/datasets/EditScore/EditScore-RL-Data) are available.
+- 2025-10-15: **EditScore** is now available on PyPI — install it easily with `pip install editscore`.
+- 2025-10-15: Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit are now available! See [this](#apply-editscore-to-image-editing) for details.
 - 2025-09-30: We release **OmniGen2-EditScore7B**, unlocking online RL For Image Editing via high-fidelity EditScore. LoRA weights are available at [Hugging Face](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B) and [ModelScope](https://www.modelscope.cn/models/OmniGen2/OmniGen2-EditScore7B).
 - 2025-09-30: We are excited to release **EditScore** and **EditReward-Bench**! Model weights and the benchmark dataset are now publicly available. You can access them on Hugging Face: [Models Collection](https://huggingface.co/collections/EditScore/editscore-68d8e27ee676981221db3cfe) and [Benchmark Dataset](https://huggingface.co/datasets/EditScore/EditReward-Bench), and on ModelScope: [Models Collection](https://www.modelscope.cn/collections/EditScore-8b0d53aa945d4e) and [Benchmark Dataset](https://www.modelscope.cn/datasets/EditScore/EditReward-Bench).
 

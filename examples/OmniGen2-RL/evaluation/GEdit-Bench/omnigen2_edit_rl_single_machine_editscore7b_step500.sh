@@ -3,9 +3,6 @@ SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 cd $(dirname $SHELL_FOLDER)
 cd ../
 
-source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
-conda activate py3.12+pytorch2.7.1+cu126
-
 RANK=0
 MASTER_ADDR=1
 MASTER_PORT=29500
