@@ -88,7 +88,7 @@ train:
     num_update_steps_per_sampling: 2
     batch_size_per_forward: 9
     num_images_per_prompt: 12
-    sigma_coef: 0.9
+    sigma_coef: 0.7
     negative_prompt: ""
     num_inference_step: 20
     max_sequence_length: 1024
