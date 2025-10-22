@@ -10,5 +10,5 @@ wandb
 ninja
 triton-windows; sys_platform == "win32"
 matplotlib
-flash_attn==2.8.0.post2
+flash_attn
 flask
