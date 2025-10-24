@@ -59,6 +59,27 @@ class EditScore:
                 lora_path=lora_path,
                 cache_dir=cache_dir,
             )
+        elif self.backbone == "qwen3vl":
+            from .mllm_tools.qwen3vl import Qwen3VL
+            self.model = Qwen3VL(
+                vlm_model=model_name_or_path,
+                temperature=temperature,
+                seed=seed,
+                lora_path=lora_path,
+            )
+        elif self.backbone == "qwen3vl_vllm":
+            from .mllm_tools.qwen3vl_vllm import Qwen3VL
+            self.model = Qwen3VL(
+                vlm_model=model_name_or_path,
+                tensor_parallel_size=tensor_parallel_size,
+                max_model_len=max_model_len,
+                max_num_seqs=max_num_seqs,
+                max_num_batched_tokens=max_num_batched_tokens,
+                temperature=temperature,
+                seed=seed,
+                lora_path=lora_path,
+                cache_dir=cache_dir,
+            )
         elif self.backbone == "internvl3_5":
             from .mllm_tools.internvl35_lmdeploy import InternVL35
             self.model = InternVL35(model=model_name_or_path, tensor_parallel_size=tensor_parallel_size)

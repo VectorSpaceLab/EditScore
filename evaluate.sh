@@ -7,7 +7,6 @@ python evaluation.py \
 --result_dir results/EditScore-7B \
 --backbone qwen25vl \
 --model_name_or_path Qwen/Qwen2.5-VL-7B-Instruct \
---enable_lora \
 --lora_path EditScore/EditScore-7B \
 --score_range 25 \
 --max_workers 1 \

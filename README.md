@@ -127,7 +127,7 @@ pip install -e .
 #### ✅ (Recommended) Install Optional High-Performance Dependencies
 For the best performance, especially during inference, we highly recommend installing vllm.
 ```bash
-pip install vllm
+pip install -U vllm
 ```
 
 ---
