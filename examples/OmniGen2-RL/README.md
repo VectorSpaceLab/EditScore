@@ -181,6 +181,7 @@ Once the checkpoint is converted, you can benchmark its performance. We provide 
 You can use our example scripts as a template. Simply copy one and modify the internal paths to point to your newly converted model checkpoint.
 ```shell
 # Run evaluation for the converted model from step 500
-bash evaluation/GEdit-Bench/omnigen2_edit_rl_single_machine_editscore7b_step500.sh
+bash evaluation/GEdit-Bench/omnigen2.sh --experiment_name=omnigen2_edit_rl_4machine_editscore7b_avg4 --step=500
+bash evaluation/GEdit-Bench/omnigen2_eval.sh --experiment_name=omnigen2_edit_rl_4machine_editscore7b_avg4 --step=500
 ```
 By comparing the results to the baseline model's performance, you can quantify the improvements achieved through RL fine-tuning with EditScore.
