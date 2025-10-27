@@ -105,7 +105,7 @@ train:
     server_type: vlm
     use_ori_neg_prompt_template: true
     time_shift_base_res: 168
-    policy_loss_reweighting: false
+    policy_loss_reweighting: true
 
 val:
   train_visualization_interval: 5

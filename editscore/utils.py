@@ -4,6 +4,7 @@ import json
 import regex as re
 import ast
 import random
+import json_repair
 
 def fix_json(input_str):
     # Add double quotes around keys using regex
@@ -179,21 +180,21 @@ def fallback_repair_json(input_str: str) -> str:
 
 def robust_json_fix(s: str):
     try:
-        return json.loads(s)
+        return json_repair.loads(s)
     except Exception:
         pass
     
     for fixer in [fix_json, repair_reasoning_field_robust]:
         s = fixer(s)
         try:
-            return json.loads(s)
+            return json_repair.loads(s)
         except Exception:
             print(f"Error: Cannot fix {fixer.__name__} {s=}")
             continue
 
     try:
         repaired_str = fallback_repair_json(s)
-        return json.loads(repaired_str)
+        return json_repair.loads(repaired_str)
     except Exception as e:
         print(f"Error: Cannot fix fallback_repair_json {s=} {e=}")
         return False
@@ -400,18 +401,6 @@ def mllm_output_to_dict(input_string, give_up_parsing=False, text_prompt=None, s
             print(f"Now fixing: {e1=} {json_str=}")
             
             new_data = robust_json_fix(json_str)
-
-            # try:
-            #     new_data = json.loads(fix_json(json_str))
-            #     return new_data
-            # except Exception as e2:
-            #     try:
-            #         print(f"Now fixing: {e2=} {fix_json(json_str)=}")
-            #         new_data = json.loads(repair_reasoning_field_robust(fix_json(json_str)))
-            #         return new_data
-            #     except Exception as e3:
-            #         print(f"Error: Cannot fix {e3=} {repair_reasoning_field_robust(fix_json(json_str))=}")
-            #         return False
         return new_data
     else:
         print("The required delimiters were not found correctly in the string.")

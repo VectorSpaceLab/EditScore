@@ -28,6 +28,7 @@
 - **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
+- **2025-10-27**: Released [OmniGen2-EditScore7B-v1.1](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B-v1.1), achieving a **7.01 GEdit score** within **700 steps**, by incorporating the **reweighting strategy** from [TempFlow](https://arxiv.org/abs/2508.04324). Furthermore, we improve json fixing method using [this great library](https://github.com/mangiucugna/json_repair), now EditScore should be more stable across various conditions. Updated to it with `pip install -U editscore`.
 - **2025-10-22**: **Introducing Our Reinforcement Learning Training Framework!**
   We're excited to release our complete RL pipeline, the result of a massive effort to simplify fine-tuning for image editing models. Key features include:
     - **Ready-to-Use RL Dataset**: Includes the complete dataset used in the EditScore project, along with clear usage guidelines and preparation scripts.
