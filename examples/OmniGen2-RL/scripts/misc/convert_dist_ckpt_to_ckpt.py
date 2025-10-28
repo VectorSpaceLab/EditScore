@@ -2,17 +2,14 @@ import dotenv
 
 dotenv.load_dotenv(override=True)
 
+import sys
+import os
 import argparse
 
-from omegaconf import OmegaConf
-
 import torch
-from torch.distributed.checkpoint.format_utils import dcp_to_torch_save, torch_save_to_dcp
+from torch.distributed.checkpoint.format_utils import dcp_to_torch_save
 
-from accelerate import init_empty_weights
-
-from peft import LoraConfig
-from peft.utils import get_peft_model_state_dict
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from omnigen2.models.transformers.transformer_omnigen2 import OmniGen2Transformer2DModel
 from omnigen2.pipelines.omnigen2.pipeline_omnigen2 import OmniGen2Pipeline

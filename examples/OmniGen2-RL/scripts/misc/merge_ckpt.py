@@ -12,12 +12,10 @@ import torch
 from accelerate import init_empty_weights
 
 from peft import LoraConfig
-from peft.utils import get_peft_model_state_dict
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from omnigen2.models.transformers.transformer_omnigen2 import OmniGen2Transformer2DModel
-from omnigen2.pipelines.omnigen2.pipeline_omnigen2 import OmniGen2Pipeline
 
 
 def main(args):
@@ -57,15 +55,11 @@ def main(args):
     print(f"unexpected parameters: {unexpect}")
 
     save_path = args.save_path
-    if conf.train.get('lora_ft', False):
-        transformer_lora_layers = get_peft_model_state_dict(transformer)
-        OmniGen2Pipeline.save_lora_weights(
-            save_directory=save_path,
-            transformer_lora_layers=transformer_lora_layers,
-        )
-    else:
-        transformer.save_pretrained(save_path)
 
+    transformer.fuse_lora()
+    transformer.unload_lora()
+    state_dict = transformer.state_dict()
+    torch.save(state_dict, save_path)
 
 def parse_args():
     parser = argparse.ArgumentParser()
