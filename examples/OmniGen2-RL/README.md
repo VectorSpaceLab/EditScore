@@ -159,6 +159,8 @@ bash scripts/train/omnigen2_edit_rl_4machine_editscore7b_avg4.sh
 
 ### 4. Training Outputs and Monitoring
 All training artifacts, including logs and model checkpoints, are saved to the `experiments/` directory.
+For transparency and to ensure full reproducibility, we provide the training curves of **OmniGen2-EditScore7B-v1.1** on [Weights & Biases (wandb)](https://wandb.ai/omnigen-rl/OmniGen2-RL/reports/Training-Curves-of-OmniGen2-EditScore7B-v1-1---VmlldzoxNDg2MTI2NQ?accessToken=467cbc4jupu1maluk00pan7z611m6xxmnwviwk8nblml3ydoy3j9fu92el6c0s8i).
+
 
 ### 5. Evaluate your RL Fine-Tuned Model
 After training, you must convert the FSDP-saved checkpoint (`.bin`) into the standard Hugging Face format before you can use it for inference.
