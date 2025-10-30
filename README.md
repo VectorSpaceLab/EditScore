@@ -147,7 +147,6 @@ lora_path = "EditScore/EditScore-7B"
 scorer = EditScore(
     backbone="qwen25vl", # set to "qwen25vl_vllm" for faster inference
     model_name_or_path=model_path,
-    enable_lora=True,
     lora_path=lora_path,
     score_range=25,
     num_pass=1, # Increase for better performance via self-ensembling
