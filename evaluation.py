@@ -168,7 +168,7 @@ def main(args):
         max_num_seqs=args.max_num_seqs,
         max_num_batched_tokens=args.max_num_batched_tokens,
         num_pass=args.num_pass,
-        lora_path=None,
+        lora_path=args.lora_path,
         cache_dir=args.cache_dir,
     )
     print(f"Scorer initialized in {time.time() - start_time} seconds", flush=True)
