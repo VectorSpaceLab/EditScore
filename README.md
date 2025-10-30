@@ -157,7 +157,7 @@ output_image = Image.open("example_images/output.png")
 instruction = "Adjust the background to a glass wall."
 
 result = scorer.evaluate([input_image, output_image], instruction)
-print(f"Edit Score: {result['final_score']}")
+print(f"Edit Score: {result['overall']}")
 # Expected output: A dictionary containing the final score and other details.
 ```
 
