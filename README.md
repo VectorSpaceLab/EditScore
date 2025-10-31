@@ -28,6 +28,7 @@
 - **Versatile Applications**: Ready to use as a best-in-class reranker to improve editing outputs, or as a high-fidelity reward signal for **stable and effective Reinforcement Learning (RL) fine-tuning**.
 
 ## 🔥 News
+- **2025-10-31**: We’re thrilled to announce the **Qwen3-VL** variants of **EditScore**! 🚀 Powered by Qwen3-VL, the new 4B and 8B models achieve outstanding efficiency and performance. Impressively, the 4B model already matches the performance of the original 32B version, while the 8B model delivers results comparable to the original 72B model. The models are now available on [huggingface](https://huggingface.co/EditScore/models), see [Usage Example](#-usage-example) for how to use. Detailed comparisons with Qwen2.5-VL variants are in the [performance table](https://raw.githubusercontent.com/VectorSpaceLab/EditScore/refs/heads/main/assets/table_editscore_qwen3_vl.png).
 - **2025-10-27**: Released [OmniGen2-EditScore7B-v1.1](https://huggingface.co/OmniGen2/OmniGen2-EditScore7B-v1.1), achieving a **7.01 (+0.73) GEdit score** within **700 steps**, by incorporating the **reweighting strategy** from [TempFlow](https://arxiv.org/abs/2508.04324). Additionally, the **JSON repair process** has been enhanced using [json_repair](https://github.com/mangiucugna/json_repair), improving **EditScore’s stability** under various conditions. Upgrade via `pip install -U editscore`.
 - **2025-10-22**: **Introducing Our Reinforcement Learning Training Framework!**
   We're excited to release our complete RL pipeline, the result of a massive effort to simplify fine-tuning for image editing models. Key features include:
@@ -75,7 +76,7 @@ This repository releases both the **EditScore** models and the **EditReward-Benc
 ## 📌 TODO
 We are actively working on improving EditScore and expanding its capabilities. Here's what's next:
 
-
+- [x] Qwen3-VL variants of EditScore.
 - [x] Release training data for reward model and online RL.
 - [x] Release RL training code applying EditScore to OmniGen2.
 - [x] Provide Best-of-N inference scripts for OmniGen2, Flux-dev-Kontext, and Qwen-Image-Edit.
@@ -141,16 +142,29 @@ from editscore import EditScore
 
 # Load the EditScore model. It will be downloaded automatically.
 # Replace with the specific model version you want to use.
-model_path = "Qwen/Qwen2.5-VL-7B-Instruct"
-lora_path = "EditScore/EditScore-7B"
+model_path = "Qwen/Qwen3-VL-4B-Instruct"
+lora_path = "EditScore/EditScore-Qwen3-VL-4B-Instruct"
 
 scorer = EditScore(
-    backbone="qwen25vl", # set to "qwen25vl_vllm" for faster inference
+    backbone="qwen3vl", # set to "qwen3vl_vllm" for faster inference
     model_name_or_path=model_path,
     lora_path=lora_path,
     score_range=25,
     num_pass=1, # Increase for better performance via self-ensembling
 )
+
+# Below is Qwen2.5-VL version
+
+# model_path = "Qwen/Qwen2.5-VL-7B-Instruct"
+# lora_path = "EditScore/EditScore-7B"
+
+# scorer = EditScore(
+#     backbone="qwen25vl", # set to "qwen25vl_vllm" for faster inference
+#     model_name_or_path=model_path,
+#     lora_path=lora_path,
+#     score_range=25,
+#     num_pass=1, # Increase for better performance via self-ensembling
+# )
 
 input_image = Image.open("example_images/input.png")
 output_image = Image.open("example_images/output.png")

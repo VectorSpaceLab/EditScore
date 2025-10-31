@@ -2,15 +2,12 @@
 SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 cd $SHELL_FOLDER
 
-source "$(dirname $(which conda))/../etc/profile.d/conda.sh"
-conda activate editscore
-
 python evaluation.py \
 --benchmark_dir EditScore/EditReward-Bench \
 --result_dir results/EditScore-Qwen3-VL-4B-avg4 \
 --backbone qwen3vl \
---model_name_or_path /share/project/shared_models/Qwen3-VL-4B-Instruct \
---lora_path /share/project/jiahao/LLaMA-Factory3/output/editscore_qwen3_4B_ins \
+--model_name_or_path Qwen/Qwen3-VL-4B-Instruct \
+--lora_path EditScore/EditScore-Qwen3-VL-4B-Instruct \
 --score_range 25 \
 --max_workers 1 \
 --max_model_len 4096 \
